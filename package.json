@@ -1,0 +1,32 @@
+{
+  "name": "leadconduit-default",
+  "description": "LeadConduit default integration",
+  "author": "Alex Wolfe <alex@activeprospect.com>",
+  "version": "0.0.1",
+  "main": "index.js",
+  "licenses": [{
+    "type": "ActiveProspect, Inc. All Rights Reserved",
+    "url": "http://www.activeprospect.com/integration_license"
+  }],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/activeprospect/node-leadconduit-default.git"
+  },
+  "engines": {
+    "node": ">=0.8.1"
+  },
+  "scripts": {
+    "test": "cake test",
+    "prepublish": "cake build"
+  },
+  "dependencies": {
+    "mime-content": ">=0.0.6",
+    "mimeparse": "*",
+    "xmlbuilder": "*"
+  },
+  "devDependencies": {
+    "coffee-script": ">= 1.7.0",
+    "mocha": ">= 1.17.0",
+    "chai": ">= 1.9.0"
+  }
+}
