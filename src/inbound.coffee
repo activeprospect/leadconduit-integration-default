@@ -102,15 +102,15 @@ response = (req, vars) ->
   body = null
   if mimeType == 'application/xml' or mimeType == 'text/xml'
     xml = xmlbuilder.create('result')
-    xml.element('lead_id', vars.lead.id)
     xml.element('outcome', vars.outcome)
     xml.element('reason', vars.reason)
+    xml.element('lead').element('id', vars.lead.id)
     body = xml.end(pretty: true)
   else if mimeType == 'application/json'
     body = JSON.stringify(
-      lead_id: vars.lead.id
       outcome: vars.outcome
       reason: vars.reason
+      lead: { id: vars.lead.id }
     )
   else if mimeType == 'text/plain'
     body = ''

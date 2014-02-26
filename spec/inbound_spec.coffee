@@ -81,24 +81,24 @@ describe 'Inbound Response', ->
     req.headers['Accept'] = 'application/json'
     res = integration.response(req, vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 53
-    assert.equal res.body, '{"lead_id":"123","outcome":"failure","reason":"bad!"}'
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
+    assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
 
   it 'should respond with text xml', ->
     req = outbound.request(variables())
     req.headers['Accept'] = 'text/xml'
     res = integration.response(req, vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 118
-    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <lead_id>123</lead_id>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n</result>'
+    assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 129
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
   it 'should respond with application xml', ->
     req = outbound.request(variables())
     req.headers['Accept'] = 'application/xml'
     res = integration.response(req, vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 118
-    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <lead_id>123</lead_id>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n</result>'
+    assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 129
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
 
 
