@@ -33,10 +33,18 @@ supportedMimeTypeLookup = supportedMimeTypes.reduce(((lookup, mimeType) ->
 
 request = (req) ->
 
-  method = req.method.toLowerCase()
+  # ensure supported method
+  method = req.method?.toLowerCase()
   if method != 'get' and method != 'post'
-    throw new HttpError(405, { 'Content-Type': 'text/plain', Allow: 'GET, POST' }, "The #{method.toUpperCase()} method is not allowed")
+    throw new HttpError(415, { 'Content-Type': 'text/plain', Allow: 'GET, POST' }, "The #{method.toUpperCase()} method is not allowed")
 
+  # ensure acceptable content type
+  accept = req.headers['Accept'] or 'application/json'
+  mimeType = mimeparse.bestMatch(supportedMimeTypes, accept)
+  unless mimeType
+    throw new HttpError(406, { 'Content-Type': 'text/plain' }, "Not capable of generating content according to the Accept header")
+
+  # parse the query string
   query = querystring.parse(req.query)
 
 
@@ -56,7 +64,7 @@ request = (req) ->
       # ensure valid mime type
       mimeType = mimeparse.bestMatch(supportedMimeTypes, contentType)
       unless supportedMimeTypeLookup[mimeType]?
-        throw new HttpError(415, {'Content-Type': 'text/plain'}, "MIME type in Content-Type header is not supported. Use only #{supportedMimeTypes.join(', ')}.")
+        throw new HttpError(406, {'Content-Type': 'text/plain'}, "MIME type in Content-Type header is not supported. Use only #{supportedMimeTypes.join(', ')}.")
 
       # parse request body according the the mime type
       parsed = mimecontent(req.body, mimeType)
@@ -73,7 +81,7 @@ request = (req) ->
 
     else
       # assume no request body
-
+      query
 
 
 
@@ -87,12 +95,6 @@ request.variables = ->
 #
 
 response = (req, vars) ->
-  supportedMimeTypes = [
-    'application/json',
-    'application/xml',
-    'text/xml'
-  ]
-
   accept = req.headers['Accept'] or 'application/json'
   mimeType = mimeparse.bestMatch(supportedMimeTypes, accept)
 
@@ -120,7 +122,9 @@ response = (req, vars) ->
     'Content-Type': mimeType,
     'Content-Length': body.length
 
-  [status, headers, body]
+  status: status
+  headers: headers
+  body: body
 
 
 response.variables = ->

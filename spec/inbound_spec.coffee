@@ -1,5 +1,8 @@
 assert = require('chai').assert
 integration = require('../src/inbound')
+outbound = require('../src/outbound')
+variables = require('./helper').variables
+
 
 describe 'Inbound Request', ->
 
@@ -29,7 +32,7 @@ describe 'Inbound Request', ->
       integration.request(method: 'post', headers: { 'Content-Length': '1', 'Content-Type': 'Monkies' })
       assert.fail("expected an error to be thrown when no content type is specified")
     catch e
-      assert.equal e.status, 415
+      assert.equal e.status, 406
       assert.equal e.body, 'MIME type in Content-Type header is not supported. Use only application/x-www-form-urlencoded, application/json, application/xml, text/xml.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
@@ -66,6 +69,39 @@ describe 'Inbound Request', ->
     assertParses 'application/xml', body
 
 
+describe 'Inbound Response', ->
+
+  vars = variables()
+  vars.lead = { id: '123' }
+  vars.outcome = 'failure'
+  vars.reason = 'bad!'
+
+  it 'should respond with json', ->
+    req = outbound.request(variables())
+    req.headers['Accept'] = 'application/json'
+    res = integration.response(req, vars)
+    assert.equal res.status, 201
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 53
+    assert.equal res.body, '{"lead_id":"123","outcome":"failure","reason":"bad!"}'
+
+  it 'should respond with text xml', ->
+    req = outbound.request(variables())
+    req.headers['Accept'] = 'text/xml'
+    res = integration.response(req, vars)
+    assert.equal res.status, 201
+    assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 118
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <lead_id>123</lead_id>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n</result>'
+
+  it 'should respond with application xml', ->
+    req = outbound.request(variables())
+    req.headers['Accept'] = 'application/xml'
+    res = integration.response(req, vars)
+    assert.equal res.status, 201
+    assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 118
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <lead_id>123</lead_id>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n</result>'
+
+
+
 
 assertParses = (contentType, body) ->
   req =
@@ -76,9 +112,9 @@ assertParses = (contentType, body) ->
     body: body
 
   expected =
-    first_name: 'Joe',
-    last_name: 'Blow',
-    email: 'jblow@test.com',
+    first_name: 'Joe'
+    last_name: 'Blow'
+    email: 'jblow@test.com'
     phone_1: '5127891111'
 
   result = integration.request(req)
@@ -90,7 +126,7 @@ assertMethodNotAllowed = (method) ->
     integration.request(method: method)
     assert.fail("expected #{method} to throw an error")
   catch e
-    assert.equal e.status, 405
+    assert.equal e.status, 415
     assert.equal e.body, "The #{method.toUpperCase()} method is not allowed"
     assert.deepEqual e.headers,
       'Allow': 'GET, POST'
