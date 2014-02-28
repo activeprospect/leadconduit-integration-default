@@ -49,7 +49,7 @@ request = (req) ->
 
 
   if method == 'get'
-    querystring.parse(req.query);
+    query
 
   else if (method == 'post')
 
