@@ -18,7 +18,7 @@ supportedMimeTypes = [
   'application/x-www-form-urlencoded',
   'application/json',
   'application/xml',
-  'text/xml',
+  'text/xml'
 ]
 
 supportedMimeTypeLookup = supportedMimeTypes.reduce(((lookup, mimeType) ->
@@ -38,15 +38,13 @@ request = (req) ->
   if method != 'get' and method != 'post'
     throw new HttpError(415, { 'Content-Type': 'text/plain', Allow: 'GET, POST' }, "The #{method.toUpperCase()} method is not allowed")
 
-  # ensure acceptable content type
-  accept = req.headers['Accept'] or 'application/json'
-  mimeType = mimeparse.bestMatch(supportedMimeTypes, accept)
+  # ensure acceptable content type, preferring JSON
+  mimeType = selectMimeType(req.headers['Accept'])
   unless mimeType
     throw new HttpError(406, { 'Content-Type': 'text/plain' }, "Not capable of generating content according to the Accept header")
 
   # parse the query string
   query = querystring.parse(req.query)
-
 
   if method == 'get'
     query
@@ -62,7 +60,7 @@ request = (req) ->
         throw new HttpError(415, {'Content-Type': 'text/plain'}, 'Content-Type header is required')
 
       # ensure valid mime type
-      mimeType = mimeparse.bestMatch(supportedMimeTypes, contentType)
+      mimeType = selectMimeType(req.headers['Content-Type'])
       unless supportedMimeTypeLookup[mimeType]?
         throw new HttpError(406, {'Content-Type': 'text/plain'}, "MIME type in Content-Type header is not supported. Use only #{supportedMimeTypes.join(', ')}.")
 
@@ -95,8 +93,7 @@ request.variables = ->
 #
 
 response = (req, vars) ->
-  accept = req.headers['Accept'] or 'application/json'
-  mimeType = mimeparse.bestMatch(supportedMimeTypes, accept)
+  mimeType = selectMimeType(req.headers['Accept'])
 
   status = 201
   body = null
@@ -133,6 +130,17 @@ response.variables = ->
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
   ]
+
+
+#
+# Helpers ----------------------------------------------------------------
+#
+
+selectMimeType = (contentType) ->
+  contentType = contentType or 'application/json'
+  contentType = 'application/json' if contentType == '*/*'
+  mimeparse.bestMatch(supportedMimeTypes, contentType)
+
 
 
 #

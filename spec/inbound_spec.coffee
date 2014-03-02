@@ -84,6 +84,12 @@ describe 'Inbound Response', ->
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
     assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
 
+  it 'should default to json', ->
+    req = outbound.request(variables())
+    req.headers['Accept'] = '*/*'
+    res = integration.response(req, vars)
+    assert.deepEqual res.headers['Content-Type'],  'application/json'
+
   it 'should respond with text xml', ->
     req = outbound.request(variables())
     req.headers['Accept'] = 'text/xml'
