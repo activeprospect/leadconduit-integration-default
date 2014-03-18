@@ -2,6 +2,7 @@ mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
+DataObjectParser = require('dataobject-parser')
 
 HttpError = (status, headers, body) ->
   Error.call(@)
@@ -66,6 +67,10 @@ request = (req) ->
 
       # parse request body according the the mime type
       parsed = mimecontent(req.body, mimeType)
+
+      # if form URL encoding, convert dot notation keys
+      if mimeType == 'application/x-www-form-urlencoded'
+        parsed = resolveKeysWithDotNotation(parsed)
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'
@@ -140,6 +145,14 @@ selectMimeType = (contentType) ->
   contentType = contentType or 'application/json'
   contentType = 'application/json' if contentType == '*/*'
   mimeparse.bestMatch(supportedMimeTypes, contentType)
+
+
+resolveKeysWithDotNotation = (obj) ->
+  parser = new DataObjectParser()
+  for key, value of obj
+    parser.set key, value
+  parser.data()
+
 
 
 

@@ -22,7 +22,8 @@
   "dependencies": {
     "mime-content": ">=0.0.6",
     "mimeparse": "*",
-    "xmlbuilder": "*"
+    "xmlbuilder": "*",
+    "dataobject-parser": "*"
   },
   "devDependencies": {
     "coffee-script": ">= 1.7.0",

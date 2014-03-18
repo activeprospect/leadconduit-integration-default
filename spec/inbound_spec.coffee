@@ -40,6 +40,13 @@ describe 'Inbound Request', ->
     body = 'first_name=Joe&last_name=Blow&email=jblow@test.com&phone_1=5127891111'
     assertParses 'application/x-www-form-urlencoded', body
 
+  it 'should parse nested form url encoded body', ->
+    body = 'first_name=Joe&callcenter.additional_services=script+writing'
+    assertParses 'application/x-www-form-urlencoded', body,
+      first_name: 'Joe'
+      callcenter:
+        additional_services: 'script writing'
+
   it 'should parse posted json body', ->
     body = '{"first_name":"Joe","last_name":"Blow","email":"jblow@test.com","phone_1":"5127891111"}'
     assertParses 'application/json', body
@@ -109,7 +116,7 @@ describe 'Inbound Response', ->
 
 
 
-assertParses = (contentType, body) ->
+assertParses = (contentType, body, expected) ->
   req =
     method: 'POST'
     headers:
@@ -117,7 +124,7 @@ assertParses = (contentType, body) ->
       'Content-Type': contentType
     body: body
 
-  expected =
+  expected ?=
     first_name: 'Joe'
     last_name: 'Blow'
     email: 'jblow@test.com'
