@@ -4,10 +4,12 @@
   "author": "Alex Wolfe <alex@activeprospect.com>",
   "version": "0.0.4",
   "main": "index.js",
-  "licenses": [{
-    "type": "ActiveProspect, Inc. All Rights Reserved",
-    "url": "http://www.activeprospect.com/integration_license"
-  }],
+  "licenses": [
+    {
+      "type": "ActiveProspect, Inc. All Rights Reserved",
+      "url": "http://www.activeprospect.com/integration_license"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/activeprospect/leadconduit-integration-default.git"
@@ -23,7 +25,8 @@
     "mime-content": ">=0.0.6",
     "mimeparse": "*",
     "xmlbuilder": "*",
-    "dataobject-parser": "*"
+    "dataobject-parser": "*",
+    "leadconduit-integration": "0.0.1"
   },
   "devDependencies": {
     "coffee-script": ">= 1.7.0",

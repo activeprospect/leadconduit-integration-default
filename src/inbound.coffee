@@ -3,16 +3,7 @@ mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
 DataObjectParser = require('dataobject-parser')
-
-HttpError = (status, headers, body) ->
-  Error.call(@)
-  Error.captureStackTrace(@, arguments.callee)
-  @status = status
-  @headers = headers
-  @body = body
-  @name = 'HttpError'
-
-HttpError.prototype.__proto__ = Error.prototype;
+HttpError = require('leadconduit-integration').HttpError
 
 
 supportedMimeTypes = [
