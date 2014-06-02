@@ -2,12 +2,12 @@
   "name": "leadconduit-default",
   "description": "LeadConduit default integration",
   "author": "Alex Wolfe <alex@activeprospect.com>",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "index.js",
   "licenses": [
     {
-      "type": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
-      "url": "http://creativecommons.org/licenses/by-nc-nd/4.0/legalcode"
+      "type": "ActiveProspect, Inc. All Rights Reserved",
+      "url": "http://www.activeprospect.com/integration_license"
     }
   ],
   "repository": {
