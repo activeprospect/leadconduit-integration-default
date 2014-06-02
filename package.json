@@ -6,8 +6,8 @@
   "main": "index.js",
   "licenses": [
     {
-      "type": "ActiveProspect, Inc. All Rights Reserved",
-      "url": "http://www.activeprospect.com/integration_license"
+      "type": "Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International",
+      "url": "http://creativecommons.org/licenses/by-nc-nd/4.0/legalcode"
     }
   ],
   "repository": {
