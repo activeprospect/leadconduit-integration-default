@@ -10,7 +10,7 @@ task 'build', ->
     console.log('> skipping build because coffee-script is not installed')
 
 task 'test', ->
-  run './node_modules/.bin/mocha spec/* --compilers coffee:coffee-script/register --reporter spec --colors'
+  run 'NODE_ENV=test TZ=GMT ./node_modules/.bin/mocha spec/* --compilers coffee:coffee-script/register --reporter spec --colors'
 
 task 'clean', ->
   run 'rm -fr ./lib'
@@ -28,5 +28,8 @@ run = (args...) ->
   cmd = spawn '/bin/sh', ['-c', command], options
   cmd.stdout.on 'data', (data) -> process.stdout.write data
   cmd.stderr.on 'data', (data) -> process.stderr.write data
-  process.on 'SIGHUP', -> cmd.kill()
-  cmd.on 'exit', (code) -> callback() if callback? and code is 0
+  process.on 'SIGHUP', ->
+    cmd.kill()
+  cmd.on 'exit', (code) ->
+    process.exit(code)
+
