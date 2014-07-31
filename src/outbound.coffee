@@ -48,8 +48,8 @@ request = (vars) ->
   # build lead data
   content = {}
   for key, value of vars.lead
-    if value.normal or value.raw
-      content[key] = value.normal or value.raw
+    if value?.normal? or value?.raw?
+      content[key] = value.normal ? value.raw
     else
       content[key] = value
 

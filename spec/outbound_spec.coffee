@@ -51,6 +51,18 @@ describe 'Outbound Request', ->
     req = integration.request(vars)
     assert.equal req.url , 'http://myserver.com/leads?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
 
+  it 'should handle null variable', ->
+    vars = variables()
+    vars.lead.first_name = null
+    req = integration.request(vars)
+    assert.equal req.body, 'first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+
+  it 'should handle undefined variable', ->
+    vars = variables()
+    vars.lead.first_name = undefined
+    req = integration.request(vars)
+    assert.equal req.body, 'first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+
   it 'should encode content sent as post via querystring', ->
     req = integration.request(variables())
     assert.equal req.body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
