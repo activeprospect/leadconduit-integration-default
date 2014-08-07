@@ -38,6 +38,8 @@ request = (req) ->
   # parse the query string
   query = querystring.parse(req.query)
 
+  normalizeTrustedFormCertUrl(query)
+
   if method == 'get'
     query
 
@@ -71,6 +73,8 @@ request = (req) ->
       for name, value of query
         parsed[name] ?= value
 
+      normalizeTrustedFormCertUrl(parsed)
+
       parsed
 
     else
@@ -81,7 +85,9 @@ request = (req) ->
 
 
 request.variables = ->
-  []
+  [
+    { name: 'lead.trustedform_cert_url', type: 'string', description: 'URL to the TrustedForm Certificate' },
+  ]
 
 
 #
@@ -144,6 +150,12 @@ resolveKeysWithDotNotation = (obj) ->
     parser.set key, value
   parser.data()
 
+
+normalizeTrustedFormCertUrl = (obj) ->
+  for param, value of obj
+    if param?.toLowerCase() == 'xxtrustedformcerturl'
+      obj.trustedform_cert_url = value
+      delete obj[param]
 
 
 

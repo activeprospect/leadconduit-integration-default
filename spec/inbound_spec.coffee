@@ -47,6 +47,22 @@ describe 'Inbound Request', ->
       callcenter:
         additional_services: 'script writing'
 
+  it 'should parse xxTrustedFormCertUrl from request body', ->
+    body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
+    assertParses 'application/x-www-form-urlencoded', body, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
+
+  it 'should parse xxTrustedFormCertUrl case insensitively', ->
+    body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken'
+    assertParses 'application/x-www-form-urlencoded', body, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
+
+  it 'should parse xxTrustedFormCertUrl from query string', ->
+    req =
+      method: 'GET'
+      headers: {}
+      query: 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
+    result = integration.request(req)
+    assert.deepEqual result, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
+
   it 'should parse posted json body', ->
     body = '{"first_name":"Joe","last_name":"Blow","email":"jblow@test.com","phone_1":"5127891111"}'
     assertParses 'application/json', body
