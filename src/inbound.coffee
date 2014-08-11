@@ -164,6 +164,7 @@ normalizeTrustedFormCertUrl = (obj) ->
 #
 
 module.exports =
+  name: 'Generic POST'
   request: request,
   response: response
 
