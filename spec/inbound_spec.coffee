@@ -20,7 +20,7 @@ describe 'Inbound Request', ->
 
   it 'should require content type header for posts with content', ->
     try
-      integration.request(method: 'post', headers: { 'Content-Length': '1' })
+      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '1' })
       assert.fail("expected an error to be thrown when no content type is specified")
     catch e
       assert.equal e.status, 415
@@ -29,7 +29,7 @@ describe 'Inbound Request', ->
 
   it 'should require supported mimetype', ->
     try
-      integration.request(method: 'post', headers: { 'Content-Length': '1', 'Content-Type': 'Monkies' })
+      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '1', 'Content-Type': 'Monkies' })
       assert.fail("expected an error to be thrown when no content type is specified")
     catch e
       assert.equal e.status, 406
@@ -55,11 +55,24 @@ describe 'Inbound Request', ->
     body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken'
     assertParses 'application/x-www-form-urlencoded', body, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
 
+  it 'should parse query string on POST', ->
+    body = 'param1=val1'
+    req =
+      method: 'POST'
+      uri: '/flows/12345/sources/12345/submit?first_name=Joe&last_name=Blow&phone_1=5127891111'
+      headers: {
+        'Content-Length': body.length
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+      body: body
+    result = integration.request(req)
+    assert.deepEqual result, first_name: 'Joe', last_name: 'Blow', phone_1: '5127891111', param1: 'val1'
+
   it 'should parse xxTrustedFormCertUrl from query string', ->
     req =
       method: 'GET'
+      uri: '/flows/12345/sources/12345/submit?xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
       headers: {}
-      query: 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
     result = integration.request(req)
     assert.deepEqual result, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
 
@@ -135,6 +148,7 @@ describe 'Inbound Response', ->
 assertParses = (contentType, body, expected) ->
   req =
     method: 'POST'
+    uri: '/flows/12345/sources/12345/submit'
     headers:
       'Content-Length': body.length
       'Content-Type': contentType

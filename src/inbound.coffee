@@ -3,6 +3,7 @@ mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
 DataObjectParser = require('dataobject-parser')
+url = require('url')
 HttpError = require('leadconduit-integration').HttpError
 
 
@@ -36,7 +37,8 @@ request = (req) ->
     throw new HttpError(406, { 'Content-Type': 'text/plain' }, "Not capable of generating content according to the Accept header")
 
   # parse the query string
-  query = querystring.parse(req.query)
+  uri = url.parse(req.uri)
+  query = querystring.parse(uri.query)
 
   normalizeTrustedFormCertUrl(query)
 
