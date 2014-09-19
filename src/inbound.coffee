@@ -1,7 +1,9 @@
+_ = require('lodash')
 mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
+flat = require('flat')
 DataObjectParser = require('dataobject-parser')
 url = require('url')
 HttpError = require('leadconduit-integration').HttpError
@@ -38,7 +40,7 @@ request = (req) ->
 
   # parse the query string
   uri = url.parse(req.uri)
-  query = querystring.parse(uri.query)
+  query = flat.unflatten(querystring.parse(uri.query))
 
   normalizeTrustedFormCertUrl(query)
 
@@ -65,15 +67,14 @@ request = (req) ->
 
       # if form URL encoding, convert dot notation keys
       if mimeType == 'application/x-www-form-urlencoded'
-        parsed = resolveKeysWithDotNotation(parsed)
+        parsed = flat.unflatten(parsed)
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'
         parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
 
       # merge query string data into data parsed from request body
-      for name, value of query
-        parsed[name] ?= value
+      _.merge(parsed, query)
 
       normalizeTrustedFormCertUrl(parsed)
 
@@ -144,13 +145,6 @@ selectMimeType = (contentType) ->
   contentType = contentType or 'application/json'
   contentType = 'application/json' if contentType == '*/*'
   mimeparse.bestMatch(supportedMimeTypes, contentType)
-
-
-resolveKeysWithDotNotation = (obj) ->
-  parser = new DataObjectParser()
-  for key, value of obj
-    parser.set key, value
-  parser.data()
 
 
 normalizeTrustedFormCertUrl = (obj) ->
