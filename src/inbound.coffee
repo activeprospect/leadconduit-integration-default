@@ -4,7 +4,6 @@ mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
 flat = require('flat')
-DataObjectParser = require('dataobject-parser')
 url = require('url')
 HttpError = require('leadconduit-integration').HttpError
 
