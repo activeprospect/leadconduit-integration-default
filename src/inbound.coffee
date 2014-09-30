@@ -3,6 +3,7 @@ mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
+fields = require('leadconduit-fields')
 flat = require('flat')
 url = require('url')
 HttpError = require('leadconduit-integration').HttpError
@@ -40,6 +41,14 @@ request = (req) ->
   # parse the query string
   uri = url.parse(req.uri)
   query = flat.unflatten(querystring.parse(uri.query))
+
+  # find the redir url
+  redirUrl = query.redir_url
+
+  if redirUrl?
+    redirUrl = url.parse(redirUrl)
+    unless redirUrl.slashes and (redirUrl.protocol == 'http:' or redirUrl.protocol == 'https:')
+      throw new HttpError(400, { 'Content-Type': 'text/plain' }, 'Invalid redir_url')
 
   normalizeTrustedFormCertUrl(query)
 
@@ -99,7 +108,6 @@ request.variables = ->
 response = (req, vars) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
-  status = 201
   body = null
   if mimeType == 'application/xml' or mimeType == 'text/xml'
     xml = xmlbuilder.create('result')
@@ -119,9 +127,20 @@ response = (req, vars) ->
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
 
+  # parse the query string
+  uri = url.parse(req.uri)
+  query = flat.unflatten(querystring.parse(uri.query))
+
+  # find the redir url
+  redirUrl = query.redir_url
+
+  status = if redirUrl? then 303 else 201
+
   headers =
     'Content-Type': mimeType,
     'Content-Length': body.length
+
+  headers['Location'] = redirUrl if redirUrl?
 
   status: status
   headers: headers
@@ -151,6 +170,7 @@ normalizeTrustedFormCertUrl = (obj) ->
     if param?.toLowerCase() == 'xxtrustedformcerturl'
       obj.trustedform_cert_url = value
       delete obj[param]
+
 
 
 
