@@ -77,6 +77,31 @@ describe 'Outbound Request', ->
 
 
 describe 'Outbound Response', ->
+
+  it 'should default outcome to "success"', ->
+    vars = variables()
+    req = integration.request(variables())
+    res =
+      status: 201
+      headers:
+        'Content-Type': 'application/json'
+      body: JSON.stringify({id: 42})
+    result = integration.response(vars, req, res)
+    assert.equal result.outcome, "success"
+
+
+  it 'should default reason to empty string', ->
+    vars = variables()
+    req = integration.request(variables())
+    res =
+      status: 201
+      headers:
+        'Content-Type': 'application/json'
+      body: JSON.stringify({id: 42})
+    result = integration.response(vars, req, res)
+    assert.equal result.reason, ""
+
+
   it 'should parse XML response', ->
     vars = variables()
     req = integration.request(vars)
