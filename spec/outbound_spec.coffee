@@ -78,7 +78,7 @@ describe 'Outbound Request', ->
 
 describe 'Outbound Response', ->
 
-  it 'should default outcome to "success"', ->
+  it 'should default outcome to "error"', ->
     vars = variables()
     req = integration.request(variables())
     res =
@@ -87,10 +87,10 @@ describe 'Outbound Response', ->
         'Content-Type': 'application/json'
       body: JSON.stringify({id: 42})
     result = integration.response(vars, req, res)
-    assert.equal result.outcome, "success"
+    assert.equal result.outcome, "error"
 
 
-  it 'should default reason to empty string', ->
+  it 'should default reason to an error message', ->
     vars = variables()
     req = integration.request(variables())
     res =
@@ -99,7 +99,20 @@ describe 'Outbound Response', ->
         'Content-Type': 'application/json'
       body: JSON.stringify({id: 42})
     result = integration.response(vars, req, res)
-    assert.equal result.reason, ""
+    assert.equal result.reason, "Unrecognized response"
+
+
+  it 'should preserve existing reason even if outcome defaults to "error"', ->
+    vars = variables()
+    req = integration.request(variables())
+    res =
+      status: 201
+      headers:
+        'Content-Type': 'application/json'
+      body: JSON.stringify({id: 42, reason: 'Big bada boom'})
+    result = integration.response(vars, req, res)
+    assert.equal result.outcome, "error"
+    assert.equal result.reason, "Big bada boom"
 
 
   it 'should parse XML response', ->
