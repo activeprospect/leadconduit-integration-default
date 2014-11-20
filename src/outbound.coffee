@@ -107,6 +107,10 @@ response = (vars, req, res) ->
   if mimeType == 'application/xml' or mimeType == 'text/xml'
     parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
 
+  if !parsed.outcome?
+    parsed.outcome = 'error'
+    parsed.reason  = parsed.reason || 'Unrecognized response'
+
   parsed
 
 
