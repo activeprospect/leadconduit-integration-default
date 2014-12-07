@@ -97,7 +97,7 @@ request = (req) ->
 
 request.variables = ->
   [
-    { name: 'lead.trustedform_cert_url', type: 'string', description: 'URL to the TrustedForm Certificate' },
+    { name: 'trustedform_cert_url', type: 'string', description: 'URL to the TrustedForm Certificate' },
   ]
 
 
