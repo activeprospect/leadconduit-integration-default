@@ -39,8 +39,8 @@ request = (req) ->
     throw new HttpError(406, { 'Content-Type': 'text/plain' }, "Not capable of generating content according to the Accept header")
 
   # parse the query string
-  uri = url.parse(req.uri)
-  query = flat.unflatten(querystring.parse(uri.query))
+  uri = url.parse(req.uri, true)
+  query = flat.unflatten(uri.query)
 
   # find the redir url
   redirUrl = query.redir_url
