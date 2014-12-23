@@ -114,42 +114,81 @@ describe 'Inbound Response', ->
   vars.reason = 'bad!'
 
   it 'should respond with json', ->
-    req = normalize outbound.request(variables())
-    req.headers['Accept'] = 'application/json'
+    req =
+      uri: '/whatever'
+      method: 'post'
+      version: '1.1'
+      headers:
+        'Accept': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: 'first_name=Joe'
+      timestamp: new Date().getTime()
     res = integration.response(req, vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
     assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
 
   it 'should default to json', ->
-    req = normalize outbound.request(variables())
-    req.headers['Accept'] = '*/*'
+    req =
+      uri: '/whatever'
+      method: 'post'
+      version: '1.1'
+      headers:
+        'Accept': '*/*'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: 'first_name=Joe'
+      timestamp: new Date().getTime()
     res = integration.response(req, vars)
+    assert.equal res.status, 201
     assert.deepEqual res.headers['Content-Type'],  'application/json'
 
+
+
   it 'should respond with text xml', ->
-    req = normalize outbound.request(variables())
-    req.headers['Accept'] = 'text/xml'
+    req =
+      uri: '/whatever'
+      method: 'post'
+      version: '1.1'
+      headers:
+        'Accept': 'text/xml'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: 'first_name=Joe'
+      timestamp: new Date().getTime()
     res = integration.response(req, vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
   it 'should respond with application xml', ->
-    req = normalize outbound.request(variables())
-    req.headers['Accept'] = 'application/xml'
+    req =
+      uri: '/whatever'
+      method: 'post'
+      version: '1.1'
+      headers:
+        'Accept': 'application/xml'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: 'first_name=Joe'
+      timestamp: new Date().getTime()
     res = integration.response(req, vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
+
+
   it 'should redirect', ->
-    req = normalize outbound.request(variables())
-    req.uri = "#{req.uri}?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip"
+    req =
+      uri: '/whatever?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'
+      method: 'post'
+      version: '1.1'
+      headers:
+        'Accept': 'application/xml'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: 'first_name=Joe'
+      timestamp: new Date().getTime()
     res = integration.response(req, vars)
     assert.equal res.status, 303
     assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
-
 
 
 
@@ -182,12 +221,3 @@ assertMethodNotAllowed = (method) ->
     assert.deepEqual e.headers,
       'Allow': 'GET, POST'
       'Content-Type': 'text/plain'
-
-normalize = (req) ->
-  u = url.parse(req.url)
-  method: req.method,
-  uri: u.path,
-  version: req.version ? '1.1',
-  headers: req.headers,
-  body: req.body,
-  timestamp: new Date().getTime()

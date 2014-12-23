@@ -1,14 +1,18 @@
 assert = require('chai').assert
+nock = require('nock')
 integration = require('../src/outbound')
 variables = require('./helper').variables
 
 describe 'Outbound Request', ->
 
+  afterEach ->
+    @service.done() if @service?
+
   it 'should require url variable', ->
     vars = variables()
     delete vars.url
     try
-      integration.request(vars)
+      integration.handle(vars)
       assert.fail('expected error when url variable is missing')
     catch e
       assert.equal e.message, 'Cannot connect to service because URL is missing'
@@ -17,7 +21,7 @@ describe 'Outbound Request', ->
     vars = variables()
     vars.url = 'donkeykong'
     try
-      integration.request(vars)
+      integration.handle(vars)
       assert.fail('expected error when url variable is invalid')
     catch e
       assert.equal e.message, 'Cannot connect to service because URL is invalid'
@@ -34,92 +38,107 @@ describe 'Outbound Request', ->
   it 'should not allow patch', ->
     assertMethodNotAllowed('patch')
 
-  it 'should send accept header', ->
-    req = integration.request(variables())
-    assert.equal req.headers['Accept'], 'application/json;q=0.9,text/xml;q=0.8,application/xml;q=0.7'
+  it 'should send accept header', (done) ->
+    @service = nock('http://externalservice')
+      .matchHeader('accept', 'application/json;q=0.9,text/xml;q=0.8,application/xml;q=0.7')
+      .post('/')
+      .reply(200, {})
+    integration.handle variables(), done
 
-  it 'should encode content sent via get as querystring', ->
-    vars = variables()
-    vars.method = 'get'
-    req = integration.request(vars)
-    assert.equal req.url , 'http://myserver.com/leads?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+  it 'should encode content sent via get as querystring', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111')
+      .reply(200, {})
+    integration.handle variables(method: 'get'), done
 
-  it 'should merge content sent via get over querystring', ->
-    vars = variables()
-    vars.url = "#{vars.url}?first_name=Bobby&aff_id=123"
-    vars.method = 'get'
-    req = integration.request(vars)
-    assert.equal req.url , 'http://myserver.com/leads?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+  it 'should merge content sent via get over querystring', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111')
+      .reply(200, {})
+    integration.handle variables(url: 'http://externalservice?first_name=Bobby&aff_id=123', method: 'get'), done
 
-  it 'should handle null variable', ->
-    vars = variables()
-    vars.lead.first_name = null
-    req = integration.request(vars)
-    assert.equal req.body, 'first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+  it 'should handle null variable', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111')
+      .reply(200, {})
+    integration.handle variables(lead: { first_name: null }, method: 'get'), done
 
-  it 'should handle undefined variable', ->
-    vars = variables()
-    vars.lead.first_name = undefined
-    req = integration.request(vars)
-    assert.equal req.body, 'first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+  it 'should handle undefined variable', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?last_name=Blow&email=jblow%40test.com&phone_1=5127891111')
+      .reply(200, {})
+    integration.handle variables(lead: { first_name: undefined }, method: 'get'), done
 
-  it 'should encode content sent as post via querystring', ->
-    req = integration.request(variables())
-    assert.equal req.body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+  it 'should encode content sent as post', (done) ->
+    @service = nock('http://externalservice')
+      .post '/', 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+      .reply(200, {})
+    integration.handle variables(), done
 
-  it 'should set content length of post', ->
-    req = integration.request(variables())
-    assert.equal req.headers['Content-Length'], 71
+  it 'should set content length of post', (done) ->
+    @service = nock('http://externalservice')
+      .matchHeader('content-length', 71)
+      .post '/'
+      .reply(200, {})
+    integration.handle variables(), done
 
-  it 'should set content type of post', ->
-    req = integration.request(variables())
-    assert.equal req.headers['Content-Type'], 'application/x-www-form-urlencoded'
+  it 'should set content type of post', (done) ->
+    @service = nock('http://externalservice')
+      .matchHeader('content-type', 'application/x-www-form-urlencoded')
+      .post '/'
+      .reply(200, {})
+    integration.handle variables(), done
 
 
 describe 'Outbound Response', ->
 
-  it 'should default outcome to "error"', ->
-    vars = variables()
-    req = integration.request(variables())
-    res =
-      status: 201
-      headers:
-        'Content-Type': 'application/json'
-      body: JSON.stringify({id: 42})
-    result = integration.response(vars, req, res)
-    assert.equal result.outcome, "error"
+  it 'should default outcome to "error"', (done) ->
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, id: 42)
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      assert.equal event.outcome, 'error'
+      done()
+
+  it 'should default outcome to an error message', (done) ->
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, id: 42)
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      assert.equal event.reason, 'Unrecognized response'
+      done()
+
+  it 'should preserve existing reason even if outcome defaults to "error"', (done) ->
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, id: 42, reason: 'Big bada boom')
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      assert.equal event.outcome, 'error'
+      assert.equal event.reason, 'Big bada boom'
+      done()
 
 
-  it 'should default reason to an error message', ->
-    vars = variables()
-    req = integration.request(variables())
-    res =
-      status: 201
-      headers:
-        'Content-Type': 'application/json'
-      body: JSON.stringify({id: 42})
-    result = integration.response(vars, req, res)
-    assert.equal result.reason, "Unrecognized response"
+  it 'should parse XML response', (done) ->
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, xmlBody(), 'Content-Type': 'text/xml')
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      expected =
+        outcome: 'success'
+        reason: ''
+        lead:
+          id: '1234'
+          last_name: 'Blow'
+          email: 'jblow@test.com'
+          phone_1: '5127891111'
+      assert.deepEqual event, expected
+      done()
 
-
-  it 'should preserve existing reason even if outcome defaults to "error"', ->
-    vars = variables()
-    req = integration.request(variables())
-    res =
-      status: 201
-      headers:
-        'Content-Type': 'application/json'
-      body: JSON.stringify({id: 42, reason: 'Big bada boom'})
-    result = integration.response(vars, req, res)
-    assert.equal result.outcome, "error"
-    assert.equal result.reason, "Big bada boom"
-
-
-  it 'should parse XML response', ->
-    vars = variables()
-    req = integration.request(vars)
-    res = xmlResponse()
-    result = integration.response(vars, req, res)
+  it 'should parse JSON response', (done) ->
     expected =
       outcome: 'success'
       reason: ''
@@ -128,42 +147,25 @@ describe 'Outbound Response', ->
         last_name: 'Blow'
         email: 'jblow@test.com'
         phone_1: '5127891111'
-    assert.deepEqual result, expected
-
-
-  it 'should parse JSON response', ->
-    expected =
-      outcome: 'success'
-      reason: ''
-      lead:
-        id: '1234'
-        last_name: 'Blow'
-        email: 'jblow@test.com'
-        phone_1: '5127891111'
-    vars = variables()
-    req = integration.request(variables())
-    res =
-      status: 201
-      headers:
-        'Content-Type': 'application/json'
-      body: JSON.stringify(expected)
-    result = integration.response(vars, req, res)
-    assert.deepEqual result, expected
-
-
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, expected)
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      assert.deepEqual event, expected
+      done()
 
 assertMethodNotAllowed = (method) ->
   vars = variables()
   vars.method = method
   try
-    integration.request(vars)
+    integration.handle(vars)
     assert.fail('expected integration to throw an error')
   catch e
     assert.equal e.message, "Unsupported HTTP method #{method.toUpperCase()}. Use GET or POST."
 
-
-xmlResponse = ->
-  body = '''
+xmlBody = ->
+  '''
     <result>
       <outcome>success</outcome>
       <reason/>
@@ -175,7 +177,3 @@ xmlResponse = ->
       </lead>
     </result>
   '''
-  status: 201
-  headers:
-    'Content-Type': 'text/xml'
-  body: body
