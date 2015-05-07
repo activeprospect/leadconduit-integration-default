@@ -138,6 +138,19 @@ describe 'Outbound Response', ->
       assert.deepEqual event, expected
       done()
 
+  it 'should handle poorly formed XML response', (done) ->
+    # uses sample invalid XML from customer
+    @service = nock('http://externalservice')
+    .post '/'
+    .reply(200, '<status>Error</status><reason>Please send in the mg_site_id and mg_cid as part of your request. Request Parameter = mg_site_id</reason>', 'Content-Type': 'text/xml')
+    integration.handle variables(), (err, event) ->
+      return done(err) if err?
+      expected =
+        outcome: 'error'
+        reason: 'Unrecognized response'
+      assert.deepEqual event, expected
+      done()
+
   it 'should parse JSON response', (done) ->
     expected =
       outcome: 'success'
@@ -177,3 +190,4 @@ xmlBody = ->
       </lead>
     </result>
   '''
+
