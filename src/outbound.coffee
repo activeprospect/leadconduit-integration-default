@@ -20,8 +20,9 @@ handle = (vars, callback) ->
     parsed = parseResponseBody(res.headers['content-type'], body)
 
     if !parsed.outcome?
-      parsed.outcome = 'error'
-      parsed.reason ?= 'Unrecognized response'
+      parsed =
+        outcome: 'error'
+        reason: parsed.reason or 'Unrecognized response'
 
     callback null, parsed
 
