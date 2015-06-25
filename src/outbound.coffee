@@ -34,8 +34,9 @@ handle = (vars, callback) ->
 
 requestVariables = ->
   [
-    { name: 'url', description: 'Server URL', required: true }
-    { name: 'method', description: 'HTTP method (GET or POST)', required: true }
+    { name: 'url', description: 'Server URL', type: 'string', required: true }
+    { name: 'method', description: 'HTTP method (GET or POST)', type: 'string', required: true }
+    { name: 'lead.*', type: 'wildcard', required: true }
   ]
 
 responseVariables = ->
