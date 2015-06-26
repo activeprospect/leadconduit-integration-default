@@ -103,6 +103,15 @@ describe 'Outbound Request', ->
 
 
 
+describe 'Outbound Validate', ->
+
+  it 'should require valid default_outcome', ->
+    assert.equal integration.validate(default_outcome: 'donkey'), 'default outcome must be "success", "failure" or "error"'
+
+  it 'should allow valid default_outcome', ->
+    assert.isUndefined integration.validate(default_outcome: 'success')
+
+
 describe 'Outbound Response', ->
 
   it 'should default outcome to "error"', (done) ->
@@ -112,6 +121,15 @@ describe 'Outbound Response', ->
     integration.handle variables(), (err, event) ->
       return done(err) if err?
       assert.equal event.outcome, 'error'
+      done()
+
+  it 'should default outcome to specified default', (done) ->
+    @service = nock('http://externalservice')
+      .post '/'
+      .reply(200, id: 42)
+    integration.handle variables(default_outcome: 'success'), (err, event) ->
+      return done(err) if err?
+      assert.equal event.outcome, 'success'
       done()
 
   it 'should default outcome to an error message', (done) ->

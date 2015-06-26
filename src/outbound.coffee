@@ -22,7 +22,7 @@ handle = (vars, callback) ->
 
     if !parsed.outcome?
       parsed =
-        outcome: 'error'
+        outcome: vars.default_outcome or 'error'
         reason: parsed.reason or 'Unrecognized response'
 
     callback null, parsed
@@ -37,6 +37,7 @@ requestVariables = ->
   [
     { name: 'url', description: 'Server URL', type: 'string', required: true }
     { name: 'method', description: 'HTTP method (GET or POST)', type: 'string', required: true }
+    { name: 'default_outcome', description: 'Outcome to return if recipient returns none (success, failure, error). If not specified, "error" will be used.', type: 'string' }
     { name: 'lead.*', type: 'wildcard', required: true }
   ]
 
@@ -153,6 +154,12 @@ req = (vars) ->
     body: content
 
 
+validate = (vars) ->
+  if vars.default_outcome? and !vars.default_outcome.match(/success|failure|error/)
+    'default outcome must be "success", "failure" or "error"'
+
+
+
 #
 # Exports ----------------------------------------------------------------
 #
@@ -160,7 +167,7 @@ req = (vars) ->
 module.exports =
   name: 'Generic POST'
   handle: handle
+  validate: validate
   requestVariables: requestVariables
   responseVariables: responseVariables
-
 
