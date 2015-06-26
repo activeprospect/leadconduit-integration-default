@@ -89,6 +89,19 @@ describe 'Outbound Request', ->
       .reply(200, {})
     integration.handle variables(), done
 
+  it 'should handle dot notation vars', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?deeply.nested.var=Hola')
+      .reply(200, {})
+    integration.handle url: 'http://externalservice', method: 'get', lead: { 'deeply.nested.var': 'Hola' }, done
+
+  it 'should handle deeply nested vars', (done) ->
+    @service = nock('http://externalservice')
+      .get('/?deeply.nested.var=Hola')
+      .reply(200, {})
+    integration.handle url: 'http://externalservice', method: 'get', lead: { deeply: { nested: { var: 'Hola' } } }, done
+
+
 
 describe 'Outbound Response', ->
 
