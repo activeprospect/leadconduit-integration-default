@@ -4,6 +4,7 @@ mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
 request = require('request')
+flat = require('flat')
 u = require('url')
 
 
@@ -120,8 +121,8 @@ req = (vars) ->
 
   # build lead data
   content = {}
-  for key, value of vars.lead
-    content[key] = value?.toString()
+  for key, value of flat.flatten(vars.lead)
+    content[key] = value?.valueOf()
 
   if method == 'GET'
 
@@ -150,8 +151,6 @@ req = (vars) ->
       'Content-Length': content.length
       'Accept': acceptHeader
     body: content
-
-
 
 
 #
