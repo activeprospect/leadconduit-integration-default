@@ -37,6 +37,15 @@ describe 'Inbound Request', ->
       assert.equal e.body, 'MIME type in Content-Type header is not supported. Use only application/x-www-form-urlencoded, application/json, application/xml, text/xml.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
+  it 'should require content length to match body', ->
+    try
+      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '0', 'Content-Type': 'application/json'}, body: 'first_name=Joe&callcenter.additional_services=script+writing')
+      assert.fail("expected an error to be thrown when content does not match body length")
+    catch e
+      assert.equal e.status, 400
+      assert.equal e.body, 'Declared Content-Length header does not match actual body length'
+      assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
   it 'should parse posted form url encoded body', ->
     body = 'first_name=Joe&last_name=Blow&email=jblow@test.com&phone_1=5127891111'
     assertParses 'application/x-www-form-urlencoded', body
