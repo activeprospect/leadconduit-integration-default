@@ -93,6 +93,22 @@ request = (req) ->
       query
 
 
+request.params = ->
+  [
+    {
+      name: '*'
+      type: 'Wildcard'
+    }
+    {
+      name: 'redir_url'
+      label: 'Redirect URL'
+      type: 'url'
+      description: 'Redirect to this URL after submission'
+      variable: null
+      required: false
+      examples: ['http://myserver.com/thankyou.html']
+    }
+  ]
 
 
 request.variables = ->
