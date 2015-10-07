@@ -109,7 +109,7 @@ describe 'Inbound Request', ->
 describe 'Inbound Params', ->
 
   it 'should include wildcard', ->
-    _.find integration.request.params(), (param) ->
+    assert _.find integration.request.params(), (param) ->
       param.name == '*'
 
 
