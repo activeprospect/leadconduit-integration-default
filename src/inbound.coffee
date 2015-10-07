@@ -52,7 +52,7 @@ request = (req) ->
 
   normalizeTrustedFormCertUrl(query)
 
-  if method == 'get'
+  if method == 'get' or req.headers['Content-Length'] == 0
     query
 
   else if (method == 'post')
@@ -70,11 +70,8 @@ request = (req) ->
       unless supportedMimeTypeLookup[mimeType]?
         throw new HttpError(406, {'Content-Type': 'text/plain'}, "MIME type in Content-Type header is not supported. Use only #{supportedMimeTypes.join(', ')}.")
 
-      # ensure content length matches body length
-      if req.headers['Content-Length'] != req.body.length
-        throw new HttpError(400, {'Content-Type': 'text/plain'}, 'Declared Content-Length header does not match actual body length.')
-
       # parse request body according the the mime type
+      return unless req.body
       parsed = mimecontent(req.body, mimeType)
 
       # if form URL encoding, convert dot notation keys

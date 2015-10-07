@@ -37,15 +37,6 @@ describe 'Inbound Request', ->
       assert.equal e.body, 'MIME type in Content-Type header is not supported. Use only application/x-www-form-urlencoded, application/json, application/xml, text/xml.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
-  it 'should require content length to match body', ->
-    try
-      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '0', 'Content-Type': 'application/json'}, body: 'first_name=Joe&callcenter.additional_services=script+writing')
-      assert.fail("expected an error to be thrown when content does not match body length")
-    catch e
-      assert.equal e.status, 400
-      assert.equal e.body, 'Declared Content-Length header does not match actual body length.'
-      assert.deepEqual e.headers, 'Content-Type': 'text/plain'
-
   it 'should throw an error when it cant parse xml', ->
     body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
     try
@@ -55,6 +46,33 @@ describe 'Inbound Request', ->
       assert.equal e.status, 400
       assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
+   it 'should not parse body if Content-Length is 0', ->
+      body = 'param1=val1&param2=val2'
+      req =
+        method: 'POST'
+        uri: '/flows/12345/sources/12345/submit?first_name=Joe&last_name=Blow&phone_1=5127891111'
+        headers: {
+          'Content-Length': 0
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+        body: body
+      result = integration.request(req)
+      assert.deepEqual result, first_name: 'Joe', last_name: 'Blow', phone_1: '5127891111'
+
+  it 'should not parse body if one is declared but not present', ->
+     body = ''
+     req =
+       method: 'POST'
+       uri: '/flows/12345/sources/12345/submit'
+       headers: {
+         'Content-Length': 27
+         'Content-Type': 'application/xml'
+       }
+       body: body
+     result = integration.request(req)
+     assert.deepEqual result, undefined
+
 
   it 'should parse posted form url encoded body', ->
     body = 'first_name=Joe&last_name=Blow&email=jblow@test.com&phone_1=5127891111'
