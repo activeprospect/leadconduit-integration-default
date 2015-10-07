@@ -72,7 +72,7 @@ request = (req) ->
 
       # ensure content length matches body length
       if req.headers['Content-Length'] != req.body.length
-        throw new HttpError(400, {'Content-Type': 'text/plain'}, 'Declared Content-Length header does not match actual body length')
+        throw new HttpError(400, {'Content-Type': 'text/plain'}, 'Declared Content-Length header does not match actual body length.')
 
       # parse request body according the the mime type
       parsed = mimecontent(req.body, mimeType)
@@ -83,7 +83,12 @@ request = (req) ->
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'
-        parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
+        try
+          parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
+        catch e
+          xmlError = e.toString().split('.')
+          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Body does not contain XML or XML is unparseable -- #{xmlError[0]}.")
+
 
       # merge query string data into data parsed from request body
       _.merge(parsed, query)

@@ -43,7 +43,17 @@ describe 'Inbound Request', ->
       assert.fail("expected an error to be thrown when content does not match body length")
     catch e
       assert.equal e.status, 400
-      assert.equal e.body, 'Declared Content-Length header does not match actual body length'
+      assert.equal e.body, 'Declared Content-Length header does not match actual body length.'
+      assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
+  it 'should throw an error when it cant parse xml', ->
+    body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
+    try
+      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': body.length, 'Content-Type': 'application/xml'}, body: body)
+      assert.fail("expected an error to be thrown when xml content cannot be parsed")
+    catch e
+      assert.equal e.status, 400
+      assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
   it 'should parse posted form url encoded body', ->
