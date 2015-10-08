@@ -1,7 +1,7 @@
+_ = require('lodash')
 assert = require('chai').assert
 url = require('url')
 integration = require('../src/inbound')
-outbound = require('../src/outbound')
 variables = require('./helper').variables
 
 
@@ -104,6 +104,13 @@ describe 'Inbound Request', ->
            '''
 
     assertParses 'application/xml', body
+
+
+describe 'Inbound Params', ->
+
+  it 'should include wildcard', ->
+    assert _.find integration.request.params(), (param) ->
+      param.name == '*'
 
 
 describe 'Inbound Response', ->
