@@ -52,7 +52,7 @@ request = (req) ->
 
   normalizeTrustedFormCertUrl(query)
 
-  if method == 'get'
+  if method == 'get' or req.headers['Content-Length'] == 0
     query
 
   else if (method == 'post')
@@ -71,6 +71,7 @@ request = (req) ->
         throw new HttpError(406, {'Content-Type': 'text/plain'}, "MIME type in Content-Type header is not supported. Use only #{supportedMimeTypes.join(', ')}.")
 
       # parse request body according the the mime type
+      return unless req.body
       parsed = mimecontent(req.body, mimeType)
 
       # if form URL encoding, convert dot notation keys
@@ -79,7 +80,12 @@ request = (req) ->
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'
-        parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
+        try
+          parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
+        catch e
+          xmlError = e.toString().replace(/\r?\n/g, " ")
+          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Body does not contain XML or XML is unparseable -- #{xmlError}.")
+
 
       # merge query string data into data parsed from request body
       _.merge(parsed, query)
