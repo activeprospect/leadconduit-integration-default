@@ -44,7 +44,7 @@ describe 'Inbound Request', ->
       assert.fail("expected an error to be thrown when xml content cannot be parsed")
     catch e
       assert.equal e.status, 400
-      assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag.'
+      assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag. Line: 0 Column: 1 Char: x.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
    it 'should not parse body if Content-Length is 0', ->

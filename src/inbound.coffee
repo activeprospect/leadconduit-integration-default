@@ -83,8 +83,8 @@ request = (req) ->
         try
           parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
         catch e
-          xmlError = e.toString().split('.')
-          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Body does not contain XML or XML is unparseable -- #{xmlError[0]}.")
+          xmlError = e.toString().replace(/\r?\n/g, " ")
+          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Body does not contain XML or XML is unparseable -- #{xmlError}.")
 
 
       # merge query string data into data parsed from request body
