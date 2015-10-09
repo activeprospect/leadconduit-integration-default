@@ -47,31 +47,17 @@ describe 'Inbound Request', ->
       assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag. Line: 0 Column: 1 Char: x.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
-   it 'should not parse body if Content-Length is 0', ->
-      body = 'param1=val1&param2=val2'
+   it 'should not parse empty body', ->
       req =
         method: 'POST'
         uri: '/flows/12345/sources/12345/submit?first_name=Joe&last_name=Blow&phone_1=5127891111'
         headers: {
-          'Content-Length': 0
+          'Content-Length': 152
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-        body: body
+        body: ''
       result = integration.request(req)
       assert.deepEqual result, first_name: 'Joe', last_name: 'Blow', phone_1: '5127891111'
-
-  it 'should not parse body if one is declared but not present', ->
-     body = ''
-     req =
-       method: 'POST'
-       uri: '/flows/12345/sources/12345/submit'
-       headers: {
-         'Content-Length': 27
-         'Content-Type': 'application/xml'
-       }
-       body: body
-     result = integration.request(req)
-     assert.deepEqual result, undefined
 
 
   it 'should parse posted form url encoded body', ->
