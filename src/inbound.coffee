@@ -117,6 +117,62 @@ request.params = ->
     }
   ]
 
+request.examples = (flowId, sourceId, params) ->
+  baseUri = "/flows/#{flowId}/sources/#{sourceId}/submit"
+  getUri = baseUri
+  getUri = "#{getUri}?#{querystring.encode(params)}" if Object.keys(params)?.length
+
+  postUri = baseUri
+  if params.redir_url
+    postUri = "#{postUri}?redir_url=#{encodeURIComponent(params.redir_url)}"
+    delete params.redir_url
+
+  xml = xmlbuilder.create('lead')
+  for name, value of params
+    xml.element(name, value)
+  xmlBody = xml.end(pretty: true)
+
+  [
+    {
+      method: 'GET'
+      uri: getUri
+      headers:
+        'Accept': 'application/json'
+    }
+    {
+      method: 'POST'
+      uri: postUri
+      headers:
+        'Accept': 'application/json'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: querystring.encode(params)
+    }
+    {
+      method: 'POST'
+      uri: postUri
+      headers:
+        'Accept': 'application/json'
+        'Content-Type': 'application/json'
+      body: JSON.stringify(params, null, 2)
+    }
+    {
+      method: 'POST'
+      uri: postUri
+      headers:
+        'Accept': 'text/xml'
+        'Content-Type': 'text/xml'
+      body: xmlBody
+    }
+    {
+      method: 'POST'
+      uri: postUri
+      headers:
+        'Accept': 'text/xml'
+        'Content-Type': 'application/x-www-form-urlencoded'
+      body: querystring.encode(params)
+    }
+  ]
+
 
 request.variables = ->
   [
