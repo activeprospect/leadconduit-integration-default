@@ -1,6 +1,7 @@
 _ = require('lodash')
 assert = require('chai').assert
 url = require('url')
+querystring = require('querystring')
 integration = require('../src/inbound')
 variables = require('./helper').variables
 
@@ -134,6 +135,53 @@ describe 'Inbound Params', ->
   it 'should include wildcard', ->
     assert _.find integration.request.params(), (param) ->
       param.name == '*'
+
+
+describe 'Inbound examples', ->
+
+  it 'should have uri', ->
+    examples = integration.request.examples('123', '345', {})
+    for uri in _.pluck(examples, 'uri')
+      assert.equal url.parse(uri).href, '/flows/123/sources/345/submit'
+
+  it 'should have method', ->
+    examples = integration.request.examples('123', '345', {})
+    for method in _.pluck(examples, 'method')
+      assert method == 'GET' or method == 'POST'
+
+  it 'should have headers', ->
+    examples = integration.request.examples('123', '345', {})
+    for headers in _.pluck(examples, 'headers')
+      assert _.isPlainObject(headers)
+      assert headers['Accept']
+
+  it 'should include redir url in query string', ->
+    redir = 'http://foo.com?bar=baz'
+    examples = integration.request.examples('123', '345', redir_url: redir)
+    for uri in _.pluck(examples, 'uri')
+      query = url.parse(uri, query: true).query
+      assert.equal query.redir_url, redir
+
+  it 'should properly encode URL encoded request body', ->
+    params =
+      first_name: 'alex'
+      email: 'alex@test.com'
+    examples = integration.request.examples('123', '345', params).filter (example) ->
+      example.headers['Content-Type']?.match(/urlencoded$/)
+    for example in examples
+      assert.equal example.body, querystring.encode(params)
+
+  it 'should properly encode XML request body', ->
+    examples = integration.request.examples('123', '345', first_name: 'alex', email: 'alex@test.com').filter (example) ->
+      example.headers['Content-Type']?.match(/xml$/)
+    for example in examples
+      assert.equal example.body, '<?xml version="1.0"?>\n<lead>\n  <first_name>alex</first_name>\n  <email>alex@test.com</email>\n</lead>'
+
+  it 'should properly encode JSON request body', ->
+    examples = integration.request.examples('123', '345', first_name: 'alex', email: 'alex@test.com').filter (example) ->
+      example.headers['Content-Type']?.match(/json$/)
+    for example in examples
+      assert.equal example.body, '{\n  "first_name": "alex",\n  "email": "alex@test.com"\n}'
 
 
 describe 'Inbound Response', ->
