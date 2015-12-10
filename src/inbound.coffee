@@ -134,18 +134,18 @@ request.examples = (flowId, sourceId, params) ->
 
   [
     {
-      method: 'GET'
-      uri: getUri
-      headers:
-        'Accept': 'application/json'
-    }
-    {
       method: 'POST'
       uri: postUri
       headers:
         'Accept': 'application/json'
         'Content-Type': 'application/x-www-form-urlencoded'
       body: querystring.encode(params)
+    }
+    {
+      method: 'GET'
+      uri: getUri
+      headers:
+        'Accept': 'application/json'
     }
     {
       method: 'POST'
