@@ -3,7 +3,6 @@ assert = require('chai').assert
 url = require('url')
 querystring = require('querystring')
 integration = require('../src/inbound')
-variables = require('./helper').variables
 
 
 describe 'Inbound Request', ->
@@ -11,14 +10,18 @@ describe 'Inbound Request', ->
   it 'should not allow head', ->
     assertMethodNotAllowed('head')
 
+
   it 'should not allow put', ->
     assertMethodNotAllowed('put')
+
 
   it 'should not allow delete', ->
     assertMethodNotAllowed('delete')
 
+
   it 'should not allow patch', ->
     assertMethodNotAllowed('patch')
+
 
   it 'should require content type header for posts with content', ->
     try
@@ -29,6 +32,7 @@ describe 'Inbound Request', ->
       assert.equal e.body, 'Content-Type header is required'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
+
   it 'should require supported mimetype', ->
     try
       integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '1', 'Content-Type': 'Monkies' })
@@ -37,6 +41,7 @@ describe 'Inbound Request', ->
       assert.equal e.status, 406
       assert.equal e.body, 'MIME type in Content-Type header is not supported. Use only application/x-www-form-urlencoded, application/json, application/xml, text/xml.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
 
   it 'should throw an error when it cant parse xml', ->
     body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
@@ -47,6 +52,7 @@ describe 'Inbound Request', ->
       assert.equal e.status, 400
       assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag. Line: 0 Column: 1 Char: x.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
 
    it 'should not parse empty body', ->
       req =
@@ -65,6 +71,7 @@ describe 'Inbound Request', ->
     body = 'first_name=Joe&last_name=Blow&email=jblow@test.com&phone_1=5127891111'
     assertParses 'application/x-www-form-urlencoded', body
 
+
   it 'should parse nested form url encoded body', ->
     body = 'first_name=Joe&callcenter.additional_services=script+writing'
     assertParses 'application/x-www-form-urlencoded', body,
@@ -72,13 +79,16 @@ describe 'Inbound Request', ->
       callcenter:
         additional_services: 'script writing'
 
+
   it 'should parse xxTrustedFormCertUrl from request body', ->
     body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken'
     assertParses 'application/x-www-form-urlencoded', body, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
 
+
   it 'should parse xxTrustedFormCertUrl case insensitively', ->
     body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken'
     assertParses 'application/x-www-form-urlencoded', body, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
+
 
   it 'should parse query string on POST', ->
     body = 'param1=val1'
@@ -93,6 +103,7 @@ describe 'Inbound Request', ->
     result = integration.request(req)
     assert.deepEqual result, first_name: 'Joe', last_name: 'Blow', phone_1: '5127891111', param1: 'val1'
 
+
   it 'should parse xxTrustedFormCertUrl from query string', ->
     req =
       method: 'GET'
@@ -101,9 +112,11 @@ describe 'Inbound Request', ->
     result = integration.request(req)
     assert.deepEqual result, trustedform_cert_url: 'https://cert.trustedform.com/testtoken'
 
+
   it 'should parse posted json body', ->
     body = '{"first_name":"Joe","last_name":"Blow","email":"jblow@test.com","phone_1":"5127891111"}'
     assertParses 'application/json', body
+
 
   it 'should parse text xml', ->
     body = '''
@@ -116,6 +129,7 @@ describe 'Inbound Request', ->
            '''
 
     assertParses 'text/xml', body
+
 
   it 'should parse posted application xml', ->
     body = '''
@@ -130,11 +144,13 @@ describe 'Inbound Request', ->
     assertParses 'application/xml', body
 
 
+
 describe 'Inbound Params', ->
 
   it 'should include wildcard', ->
     assert _.find integration.request.params(), (param) ->
       param.name == '*'
+
 
 
 describe 'Inbound examples', ->
@@ -144,10 +160,12 @@ describe 'Inbound examples', ->
     for uri in _.pluck(examples, 'uri')
       assert.equal url.parse(uri).href, '/flows/123/sources/345/submit'
 
+
   it 'should have method', ->
     examples = integration.request.examples('123', '345', {})
     for method in _.pluck(examples, 'method')
       assert method == 'GET' or method == 'POST'
+
 
   it 'should have headers', ->
     examples = integration.request.examples('123', '345', {})
@@ -155,12 +173,14 @@ describe 'Inbound examples', ->
       assert _.isPlainObject(headers)
       assert headers['Accept']
 
+
   it 'should include redir url in query string', ->
     redir = 'http://foo.com?bar=baz'
     examples = integration.request.examples('123', '345', redir_url: redir)
     for uri in _.pluck(examples, 'uri')
       query = url.parse(uri, query: true).query
       assert.equal query.redir_url, redir
+
 
   it 'should properly encode URL encoded request body', ->
     params =
@@ -171,11 +191,13 @@ describe 'Inbound examples', ->
     for example in examples
       assert.equal example.body, querystring.encode(params)
 
+
   it 'should properly encode XML request body', ->
     examples = integration.request.examples('123', '345', first_name: 'alex', email: 'alex@test.com').filter (example) ->
       example.headers['Content-Type']?.match(/xml$/)
     for example in examples
       assert.equal example.body, '<?xml version="1.0"?>\n<lead>\n  <first_name>alex</first_name>\n  <email>alex@test.com</email>\n</lead>'
+
 
   it 'should properly encode JSON request body', ->
     examples = integration.request.examples('123', '345', first_name: 'alex', email: 'alex@test.com').filter (example) ->
@@ -184,12 +206,13 @@ describe 'Inbound examples', ->
       assert.equal example.body, '{\n  "first_name": "alex",\n  "email": "alex@test.com"\n}'
 
 
+
 describe 'Inbound Response', ->
 
-  vars = variables()
-  vars.lead = { id: '123' }
-  vars.outcome = 'failure'
-  vars.reason = 'bad!'
+  vars =
+    lead: { id: '123' }
+    outcome: 'failure'
+    reason: 'bad!'
 
   it 'should respond with json', ->
     req =
@@ -206,6 +229,7 @@ describe 'Inbound Response', ->
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
     assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
 
+
   it 'should default to json', ->
     req =
       uri: '/whatever'
@@ -219,7 +243,6 @@ describe 'Inbound Response', ->
     res = integration.response(req, vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers['Content-Type'],  'application/json'
-
 
 
   it 'should respond with text xml', ->
@@ -237,6 +260,7 @@ describe 'Inbound Response', ->
     assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
+
   it 'should respond with application xml', ->
     req =
       uri: '/whatever'
@@ -251,7 +275,6 @@ describe 'Inbound Response', ->
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
-
 
 
   it 'should redirect', ->

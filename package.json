@@ -24,18 +24,15 @@
   "dependencies": {
     "dotaccess": "^1.0.5",
     "flat": "^1.3.0",
-    "leadconduit-fields": "^1.0.0",
-    "leadconduit-integration": "0.0.1",
+    "leadconduit-integration": "^0.1.0",
     "lodash": "^2.4.1",
     "mime-content": ">=0.0.6",
     "mimeparse": "*",
-    "request": "^2.51.0",
     "xmlbuilder": "*"
   },
   "devDependencies": {
     "chai": ">= 1.9.0",
     "coffee-script": ">= 1.7.0",
-    "mocha": ">= 1.17.0",
-    "nock": "^0.52.0"
+    "mocha": ">= 1.17.0"
   }
 }

@@ -3,7 +3,6 @@ mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
-fields = require('leadconduit-fields')
 flat = require('flat')
 url = require('url')
 HttpError = require('leadconduit-integration').HttpError

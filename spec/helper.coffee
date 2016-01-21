@@ -1,26 +1,26 @@
-flat = require 'flat'
-dotaccess = require 'dotaccess'
-fields = require 'leadconduit-fields'
-
-
-variables = (vars={}) ->
-  flatVars = flat.flatten(vars)
-
-  defaultVars =
-    url: 'http://externalservice'
-    method: 'post'
-    lead:
-      first_name: 'Joe'
-      last_name: 'Blow'
-      email: 'JBLOW@TEST.COM'
-      phone_1: '512-789-1111'
-
-  for key, value of flatVars
-    dotaccess.set(defaultVars, key, value, true)
-
-  defaultVars.lead = fields.buildLeadVars(defaultVars.lead)
-  defaultVars
+dotaccess = require('dotaccess')
+flat = require('flat')
+types = require('leadconduit-integration').test.types
 
 
 module.exports =
-  variables: variables
+  variables: (requestVariables) ->
+    parse = types.parser(requestVariables)
+
+    (override={}) ->
+
+      override = flat.flatten(override, safe: true)
+
+      vars =
+        url: 'http://externalservice'
+        method: 'post'
+        lead:
+          first_name: 'Joe'
+          last_name: 'Blow'
+          email: 'JBLOW@TEST.COM'
+          phone_1: '512-789-1111'
+
+      for key, value of override
+        dotaccess.set(vars, key, value, true)
+
+      parse(vars)
