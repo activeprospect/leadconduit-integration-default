@@ -3,29 +3,90 @@ mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
 xmlbuilder = require('xmlbuilder')
-request = require('request')
 flat = require('flat')
 u = require('url')
 
 
 
 #
-# Handle Function --------------------------------------------------------
+# Request Function --------------------------------------------------------
 #
 
-handle = (vars, callback) ->
-  options = req(vars)
-  request options, (err, res, body) ->
-    return callback(err) if err?
+request = (vars) ->
 
-    parsed = parseResponseBody(res.headers['content-type'], body)
+  url = u.parse(vars.url)
+  method = vars.method?.toUpperCase() || 'POST'
 
-    if !parsed.outcome?
-      parsed =
-        outcome: vars.default_outcome or 'error'
-        reason: parsed.reason or 'Unrecognized response'
+  # the preferred resource content-types
+  acceptHeader = 'application/json;q=0.9,text/xml;q=0.8,application/xml;q=0.7'
 
-    callback null, parsed
+  # build lead data
+  content = {}
+  for key, value of flat.flatten(vars.lead)
+    # fields with undefined as the value are not included
+    continue if typeof value == 'undefined'
+    # use valueOf to ensure the normal version is sent for all richly typed values
+    content[key] = value?.valueOf() ? null
+
+  if method == 'GET'
+
+    # build query string, merging 'over' existing querystring
+    query = querystring.parse(url.query or '')
+    for key, value of content
+      query[key] = value
+
+    url.query = query
+    delete url.search
+
+    url: u.format(url)
+    method: method,
+    headers:
+      'Accept': acceptHeader
+
+  else if method == 'POST'
+
+    # URL encoded post body
+    content = querystring.encode(content)
+
+    url: vars.url
+    method: method
+    headers:
+      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Length': content.length
+      'Accept': acceptHeader
+    body: content
+
+
+
+#
+# Response Function --------------------------------------------------------
+#
+
+response = (vars, req, res) ->
+  body = res.body
+
+  contentType = res.headers['Content-Type']
+
+  # ensure content type header was returned by server
+  unless contentType?
+    return outcome: 'error', reason: 'No Content-Type specified in server response'
+
+  # ensure valid mime type
+  mimeType = bestMimeType(contentType)
+  unless mimeType
+    return outcome: 'error', reason: 'Unsupported Content-Type specified in server response'
+
+  event = mimecontent(body, mimeType)
+
+  if mimeType == 'application/xml' or mimeType == 'text/xml'
+    event = event.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
+
+  if !event.outcome?
+    event =
+      outcome: vars.default_outcome or 'error'
+      reason: event.reason or 'Unrecognized response'
+
+  event
 
 
 
@@ -33,7 +94,7 @@ handle = (vars, callback) ->
 # Variables --------------------------------------------------------------
 #
 
-requestVariables = ->
+request.variables = ->
   [
     { name: 'url', description: 'Server URL', type: 'string', required: true }
     { name: 'method', description: 'HTTP method (GET or POST)', type: 'string', required: true }
@@ -41,7 +102,7 @@ requestVariables = ->
     { name: 'lead.*', type: 'wildcard', required: true }
   ]
 
-responseVariables = ->
+response.variables = ->
   [
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' }
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
@@ -80,83 +141,25 @@ isValidUrl = (url) ->
   url.hostname?
 
 
-parseResponseBody = (contentType, body) ->
-  return body if _.isPlainObject body
-
-  # ensure content type header was returned by server
-  unless contentType?
-    return outcome: 'error', reason: 'No Content-Type specified in server response'
-
-  # ensure valid mime type
-  mimeType = bestMimeType(contentType)
-  unless mimeType
-    return outcome: 'error', reason: 'Unsupported Content-Type specified in server response'
-
-  parsed = mimecontent(body, mimeType)
-
-  if mimeType == 'application/xml' or mimeType == 'text/xml'
-    parsed = parsed.toObject(explicitArray: false, explicitRoot: false, mergeAttrs: true)
-
-  parsed
-
-
-req = (vars) ->
+validate = (vars) ->
+  if vars.default_outcome? and !vars.default_outcome.match(/success|failure|error/)
+    return 'default outcome must be "success", "failure" or "error"'
 
   # validate URL
   unless vars.url?
-    throw new Error("Cannot connect to service because URL is missing")
+    return 'URL is required'
 
   url = u.parse(vars.url)
 
   unless isValidUrl(url)
-    throw new Error("Cannot connect to service because URL is invalid")
+    return 'URL must be valid'
 
   # validate method
   method = vars.method?.toUpperCase() || 'POST'
-
   unless method == 'GET' or method == 'POST'
-    throw new Error("Unsupported HTTP method #{method}. Use GET or POST.")
-
-  # the preferred resource content-types
-  acceptHeader = 'application/json;q=0.9,text/xml;q=0.8,application/xml;q=0.7'
-
-  # build lead data
-  content = {}
-  for key, value of flat.flatten(vars.lead)
-    content[key] = value?.valueOf()
-
-  if method == 'GET'
-
-    # build query string, merging 'over' existing querystring
-    query = querystring.parse(url.query or '')
-    for key, value of content
-      query[key] = value ? null
-
-    url.query = query
-    delete url.search
-
-    url: u.format(url)
-    method: method,
-    headers:
-      'Accept': acceptHeader
-
-  else if method == 'POST'
-
-    # URL encoded post body
-    content = querystring.encode(content)
-
-    url: vars.url
-    method: method
-    headers:
-      'Content-Type': 'application/x-www-form-urlencoded'
-      'Content-Length': content.length
-      'Accept': acceptHeader
-    body: content
+    return "Unsupported HTTP method - use GET or POST"
 
 
-validate = (vars) ->
-  if vars.default_outcome? and !vars.default_outcome.match(/success|failure|error/)
-    'default outcome must be "success", "failure" or "error"'
 
 
 
@@ -166,8 +169,7 @@ validate = (vars) ->
 
 module.exports =
   name: 'Generic POST'
-  handle: handle
+  request: request
+  response: response
   validate: validate
-  requestVariables: requestVariables
-  responseVariables: responseVariables
 
