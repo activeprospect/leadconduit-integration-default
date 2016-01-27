@@ -28,6 +28,10 @@ request = (vars) ->
     # use valueOf to ensure the normal version is sent for all richly typed values
     content[key] = value?.valueOf() ? null
 
+  if vars.default?.custom
+    for key, value of flat.flatten(vars.default.custom, safe: true)
+      content[key] = value?.valueOf() if value? and !content[key]?
+
   if method == 'GET'
 
     # build query string, merging 'over' existing querystring
@@ -100,6 +104,7 @@ request.variables = ->
     { name: 'method', description: 'HTTP method (GET or POST)', type: 'string', required: true }
     { name: 'default_outcome', description: 'Outcome to return if recipient returns none (success, failure, error). If not specified, "error" will be used.', type: 'string' }
     { name: 'lead.*', type: 'wildcard', required: true }
+    { name: 'default.custom.*', type: 'wildcard', required: false }
   ]
 
 response.variables = ->
@@ -158,8 +163,6 @@ validate = (vars) ->
   method = vars.method?.toUpperCase() || 'POST'
   unless method == 'GET' or method == 'POST'
     return "Unsupported HTTP method - use GET or POST"
-
-
 
 
 
