@@ -61,6 +61,11 @@ describe 'Outbound Request', ->
     assert.equal url, 'http://externalservice/?deeply.nested.var=Hola'
 
 
+  it 'should handle new format custom fields', ->
+    body = integration.request(variables(default: {custom: {favorite_color: 'pink'}})).body
+    assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&favorite_color=pink'
+
+
 
 describe 'Outbound Validate', ->
 
@@ -137,6 +142,7 @@ describe 'Outbound Response', ->
     event = integration.response(vars, req, res)
     assert.equal event.outcome, 'error'
     assert.equal event.reason, 'Big bada boom'
+
 
 
   it 'should parse XML response', ->
