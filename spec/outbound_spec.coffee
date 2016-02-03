@@ -65,7 +65,9 @@ describe 'Outbound Request', ->
     body = integration.request(variables(default: {custom: {favorite_color: 'pink'}})).body
     assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&favorite_color=pink'
 
-
+  it 'should overwrite standard fields with custom fields of the same name', ->
+    body = integration.request(variables(default: custom: email: 'custom@email.com')).body
+    assert.equal body, 'first_name=Joe&last_name=Blow&email=custom%40email.com&phone_1=5127891111'
 
 describe 'Outbound Validate', ->
 
