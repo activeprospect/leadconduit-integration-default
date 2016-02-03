@@ -2,7 +2,7 @@
   "name": "leadconduit-default",
   "description": "LeadConduit default integration",
   "author": "Alex Wolfe <alex@activeprospect.com>",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "main": "index.js",
   "licenses": [
     {
