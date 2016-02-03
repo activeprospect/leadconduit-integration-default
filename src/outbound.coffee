@@ -30,7 +30,7 @@ request = (vars) ->
 
   if vars.default?.custom
     for key, value of flat.flatten(vars.default.custom, safe: true)
-      content[key] = value?.valueOf() if value? and !content[key]?
+      content[key] = value?.valueOf() if value?
 
   if method == 'GET'
 
