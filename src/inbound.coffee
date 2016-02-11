@@ -258,7 +258,7 @@ normalizeTrustedFormCertUrl = (obj) ->
 #
 
 module.exports =
-  name: 'Generic POST'
+  name: 'LeadConduit Standard'
   request: request,
   response: response
 
