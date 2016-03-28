@@ -28,7 +28,7 @@
     "lodash": "^2.4.1",
     "mime-content": ">=0.0.6",
     "mimeparse": "*",
-    "xmlbuilder": "*"
+    "xmlbuilder": "^7.0.0"
   },
   "devDependencies": {
     "chai": ">= 1.9.0",
