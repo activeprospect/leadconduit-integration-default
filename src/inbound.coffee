@@ -1,4 +1,5 @@
 _ = require('lodash')
+dotaccess = require('dotaccess')
 mimecontent = require('mime-content')
 mimeparse = require('mimeparse')
 querystring = require('querystring')
@@ -184,27 +185,25 @@ request.variables = ->
 # Response Function ------------------------------------------------------
 #
 
-response = (req, vars) ->
+response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
   body = null
-  if mimeType == 'application/xml' or mimeType == 'text/xml'
-    xml = xmlbuilder.create('result')
-    xml.element('outcome', vars.outcome)
-    xml.element('reason', vars.reason)
-    xml.element('lead').element('id', vars.lead.id)
-    body = xml.end(pretty: true)
-  else if mimeType == 'application/json'
-    body = JSON.stringify(
-      outcome: vars.outcome
-      reason: vars.reason
-      lead: { id: vars.lead.id }
-    )
-  else if mimeType == 'text/plain'
+  if mimeType == 'text/plain'
     body = ''
     body += "lead_id:#{vars.lead.id}\n"
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
+  else
+    json = {}
+    for field in fieldIds
+      json[field] = dotaccess.get(vars, field)
+    json = flat.unflatten(json)
+
+    if mimeType == 'application/xml' or mimeType == 'text/xml'
+      body = xmlbuilder.create(result: json).end(pretty: true)
+    else
+      body = JSON.stringify(json)
 
   # parse the query string
   uri = url.parse(req.uri)

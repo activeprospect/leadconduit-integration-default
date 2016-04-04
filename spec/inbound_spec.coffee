@@ -215,82 +215,76 @@ describe 'Inbound Response', ->
     reason: 'bad!'
 
   it 'should respond with json', ->
-    req =
-      uri: '/whatever'
-      method: 'post'
-      version: '1.1'
-      headers:
-        'Accept': 'application/json'
-        'Content-Type': 'application/x-www-form-urlencoded'
-      body: 'first_name=Joe'
-      timestamp: new Date().getTime()
-    res = integration.response(req, vars)
+    res = integration.response(baseRequest('application/json'), vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
     assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
 
 
   it 'should default to json', ->
-    req =
-      uri: '/whatever'
-      method: 'post'
-      version: '1.1'
-      headers:
-        'Accept': '*/*'
-        'Content-Type': 'application/x-www-form-urlencoded'
-      body: 'first_name=Joe'
-      timestamp: new Date().getTime()
-    res = integration.response(req, vars)
+    res = integration.response(baseRequest('*/*'), vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers['Content-Type'],  'application/json'
 
 
   it 'should respond with text xml', ->
-    req =
-      uri: '/whatever'
-      method: 'post'
-      version: '1.1'
-      headers:
-        'Accept': 'text/xml'
-        'Content-Type': 'application/x-www-form-urlencoded'
-      body: 'first_name=Joe'
-      timestamp: new Date().getTime()
-    res = integration.response(req, vars)
+    res = integration.response(baseRequest('text/xml'), vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
 
   it 'should respond with application xml', ->
-    req =
-      uri: '/whatever'
-      method: 'post'
-      version: '1.1'
-      headers:
-        'Accept': 'application/xml'
-        'Content-Type': 'application/x-www-form-urlencoded'
-      body: 'first_name=Joe'
-      timestamp: new Date().getTime()
-    res = integration.response(req, vars)
+    res = integration.response(baseRequest(), vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 129
     assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
 
 
   it 'should redirect', ->
-    req =
-      uri: '/whatever?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'
-      method: 'post'
-      version: '1.1'
-      headers:
-        'Accept': 'application/xml'
-        'Content-Type': 'application/x-www-form-urlencoded'
-      body: 'first_name=Joe'
-      timestamp: new Date().getTime()
-    res = integration.response(req, vars)
+    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'), vars)
     assert.equal res.status, 303
     assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
 
+
+  describe 'With specified fields in response', ->
+
+    vars =
+      lead:
+        id: '123'
+        email: 'foo@bar.com'
+      outcome: 'failure'
+      reason: 'bad!'
+
+    it 'should respond with json', ->
+      res = integration.response(baseRequest('application/json'), vars, ['outcome', 'lead.id', 'lead.email'])
+      assert.equal res.status, 201
+      assert.equal res.headers['Content-Type'], 'application/json'
+      assert.equal res.body, '{"outcome":"failure","lead":{"id":"123","email":"foo@bar.com"}}'
+
+
+    it 'should respond with text xml', ->
+      res = integration.response(baseRequest('text/xml'), vars, ['outcome', 'lead.id', 'lead.email'])
+      assert.equal res.status, 201
+      assert.equal res.headers['Content-Type'], 'text/xml'
+      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n</result>'
+
+    it 'should respond with application xml', ->
+      res = integration.response(baseRequest(), vars, ['outcome', 'lead.id', 'lead.email'])
+      assert.equal res.status, 201
+      assert.equal res.headers['Content-Type'], 'application/xml'
+      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n</result>'
+
+
+baseRequest = (accept = null, querystring = '') ->
+  uri: "/whatever#{querystring}"
+  method: 'post'
+  version: '1.1'
+  headers:
+    'Accept': accept ? 'application/xml'
+    'Content-Type': 'application/x-www-form-urlencoded'
+  body: 'first_name=Joe'
+  timestamp: new Date().getTime()
 
 
 assertParses = (contentType, body, expected) ->
