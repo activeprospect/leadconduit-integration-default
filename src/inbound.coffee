@@ -197,7 +197,7 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
   else
     json = {}
     for field in fieldIds
-      json[field] = dotaccess.get(vars, field)
+      json[field] = dotaccess.get(vars, field)?.valueOf()
     json = flat.unflatten(json)
 
     if mimeType == 'application/xml' or mimeType == 'text/xml'
