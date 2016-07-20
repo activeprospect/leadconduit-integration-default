@@ -247,6 +247,12 @@ describe 'Inbound Response', ->
     assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
 
 
+  it 'should not error on multiple redir_urls', ->
+    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip&something=else&redir_url=http%3A%2F%2Fshiny%2Fhappy%3Fpeople%3Dtrue'), vars)
+    assert.equal res.status, 303
+    assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
+
+
   describe 'With specified fields in response', ->
 
     vars =
