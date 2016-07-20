@@ -4,12 +4,7 @@
   "author": "Alex Wolfe <alex@activeprospect.com>",
   "version": "2.7.3",
   "main": "index.js",
-  "licenses": [
-    {
-      "type": "ActiveProspect, Inc. All Rights Reserved",
-      "url": "http://www.activeprospect.com/integration_license"
-    }
-  ],
+  "license": "CC-BY-NC-ND-4.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/activeprospect/leadconduit-integration-default.git"
