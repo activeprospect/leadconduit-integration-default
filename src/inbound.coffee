@@ -46,8 +46,12 @@ request = (req) ->
   redirUrl = query.redir_url
 
   if redirUrl?
-    redirUrl = url.parse(redirUrl)
-    unless redirUrl.slashes and (redirUrl.protocol == 'http:' or redirUrl.protocol == 'https:')
+    redirUrl = redirUrl[0] if _.isArray(redirUrl)
+    try
+      redirUrl = url.parse(redirUrl)
+      unless redirUrl.slashes and (redirUrl.protocol == 'http:' or redirUrl.protocol == 'https:')
+        throw new HttpError(400, { 'Content-Type': 'text/plain' }, 'Invalid redir_url')
+    catch e
       throw new HttpError(400, { 'Content-Type': 'text/plain' }, 'Invalid redir_url')
 
   normalizeTrustedFormCertUrl(query)

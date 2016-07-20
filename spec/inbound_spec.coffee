@@ -104,6 +104,32 @@ describe 'Inbound Request', ->
     assert.deepEqual result, first_name: 'Joe', last_name: 'Blow', phone_1: '5127891111', param1: 'val1'
 
 
+  it 'should return 400 on invalid redir_url', ->
+    req =
+      method: 'POST'
+      uri: '/flows/12345/sources/12345/submit?redir_url=scooby.doo'
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    try
+      integration.request(req)
+      assert.fail("expected #{method} to throw an error")
+    catch e
+      assert.equal e.status, 400
+      assert.equal e.body, "Invalid redir_url"
+
+
+  it 'should not error on multiple redir_url values', ->
+    req =
+      method: 'POST'
+      uri: '/flows/12345/sources/12345/submit?redir_url=http://foo.com&first_name=Joe&redir_url=http://bar.com'
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    result = integration.request(req)
+    assert.equal result.first_name, 'Joe' # just ensure request() finished without error
+
+
   it 'should parse xxTrustedFormCertUrl from query string', ->
     req =
       method: 'GET'
