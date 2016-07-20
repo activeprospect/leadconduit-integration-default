@@ -210,7 +210,7 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
   query = flat.unflatten(querystring.parse(uri.query))
 
   # find the redir url
-  redirUrl = query.redir_url
+  redirUrl = if _.isArray(query.redir_url) then query.redir_url[0] else query.redir_url
 
   status = if redirUrl? then 303 else 201
 
