@@ -184,6 +184,20 @@ describe 'Outbound Response', ->
     assert.deepEqual event, expected
 
 
+  it 'should use handler "message" as error reason', ->
+    expected =
+      outcome: 'error'
+      reason: 'Flow is disabled'
+
+    res =
+      status: 403
+      headers:
+        'Content-Type': 'application/json'
+      body: '{ "message": "Flow is disabled" }'
+
+    event = integration.response(vars, req, res)
+    assert.deepEqual event, expected
+
 
 assertMethodNotAllowed = (method) ->
   vars = variables()
