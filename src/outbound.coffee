@@ -88,7 +88,7 @@ response = (vars, req, res) ->
   if !event.outcome?
     event =
       outcome: vars.default_outcome or 'error'
-      reason: event.reason or 'Unrecognized response'
+      reason: event.reason or event.message or 'Unrecognized response'
 
   event
 
