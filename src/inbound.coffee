@@ -31,7 +31,7 @@ request = (req) ->
   # ensure supported method
   method = req.method?.toLowerCase()
   if method != 'get' and method != 'post'
-    throw new HttpError(415, { 'Content-Type': 'text/plain', Allow: 'GET, POST' }, "The #{method.toUpperCase()} method is not allowed")
+    throw new HttpError(405, { 'Content-Type': 'text/plain', Allow: 'GET, POST' }, "The #{method.toUpperCase()} method is not allowed")
 
   # ensure acceptable content type, preferring JSON
   mimeType = selectMimeType(req.headers['Accept'])

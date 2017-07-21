@@ -343,7 +343,7 @@ assertMethodNotAllowed = (method) ->
     integration.request(method: method)
     assert.fail("expected #{method} to throw an error")
   catch e
-    assert.equal e.status, 415
+    assert.equal e.status, 405
     assert.equal e.body, "The #{method.toUpperCase()} method is not allowed"
     assert.deepEqual e.headers,
       'Allow': 'GET, POST'
