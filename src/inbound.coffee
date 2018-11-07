@@ -192,17 +192,22 @@ request.variables = ->
 response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
+  price = if vars.outcome == 'success' then vars.cost else "0"
+
   body = null
   if mimeType == 'text/plain'
     body = ''
     body += "lead_id:#{vars.lead.id}\n"
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
+    body += "price:#{price}\n"
   else
     json = {}
     for field in fieldIds
       json[field] = dotaccess.get(vars, field)?.valueOf()
     json = flat.unflatten(json)
+
+    json.price = price
 
     if mimeType == 'application/xml' or mimeType == 'text/xml'
       body = xmlbuilder.create(result: json).end(pretty: true)
@@ -234,6 +239,7 @@ response.variables = ->
     { name: 'lead.id', type: 'string', description: 'The lead identifier that the source should reference' },
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
+    { name: 'price', type: 'string', description: 'The price of the lead' }
   ]
 
 

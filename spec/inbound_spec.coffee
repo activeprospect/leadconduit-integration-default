@@ -235,77 +235,90 @@ describe 'Inbound examples', ->
 
 describe 'Inbound Response', ->
 
-  vars =
-    lead: { id: '123' }
-    outcome: 'failure'
-    reason: 'bad!'
+  beforeEach -> 
+    @vars =
+      lead: { id: '123' }
+      outcome: 'failure'
+      reason: 'bad!'
+
 
   it 'should respond with json', ->
-    res = integration.response(baseRequest('application/json'), vars)
+    res = integration.response(baseRequest('application/json'), @vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 57
-    assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"}}'
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 69
+    assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"},"price":"0"}'
 
 
   it 'should default to json', ->
-    res = integration.response(baseRequest('*/*'), vars)
+    res = integration.response(baseRequest('*/*'), @vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers['Content-Type'],  'application/json'
 
 
   it 'should respond with text xml', ->
-    res = integration.response(baseRequest('text/xml'), vars)
+    res = integration.response(baseRequest('text/xml'), @vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 129
-    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
+    assert.deepEqual res.headers, 'Content-Type': 'text/xml', 'Content-Length': 148
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n  <price>0</price>\n</result>'
 
 
   it 'should respond with application xml', ->
-    res = integration.response(baseRequest(), vars)
+    res = integration.response(baseRequest(), @vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 129
-    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n</result>'
+    assert.deepEqual res.headers, 'Content-Type': 'application/xml', 'Content-Length': 148
+    assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <reason>bad!</reason>\n  <lead>\n    <id>123</id>\n  </lead>\n  <price>0</price>\n</result>'
 
 
   it 'should redirect', ->
-    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'), vars)
+    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'), @vars)
     assert.equal res.status, 303
     assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
 
 
   it 'should not error on multiple redir_urls', ->
-    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip&something=else&redir_url=http%3A%2F%2Fshiny%2Fhappy%3Fpeople%3Dtrue'), vars)
+    res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip&something=else&redir_url=http%3A%2F%2Fshiny%2Fhappy%3Fpeople%3Dtrue'), @vars)
     assert.equal res.status, 303
     assert.equal res.headers.Location, 'http://foo/bar?baz=bip'
+
+  it 'should capture price variable', ->
+    @vars = 
+      outcome: 'success'
+      cost: "1.5"
+      lead: { id: '123' }
+    res = integration.response(baseRequest('application/json'), @vars)
+    assert.equal res.status, 201
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 55
+    assert.equal res.body, '{"outcome":"success","lead":{"id":"123"},"price":"1.5"}'
 
 
   describe 'With specified fields in response', ->
 
-    vars =
-      lead:
-        id: '123'
-        email: 'foo@bar.com'
-      outcome: 'failure'
-      reason: 'bad!'
+    beforeEach -> 
+      @vars =
+        lead: 
+          id: '123'
+          email: 'foo@bar.com'
+        outcome: 'failure'
+        reason: 'bad!'
 
     it 'should respond with json', ->
-      res = integration.response(baseRequest('application/json'), vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest('application/json'), @vars, ['outcome', 'lead.id', 'lead.email'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'application/json'
-      assert.equal res.body, '{"outcome":"failure","lead":{"id":"123","email":"foo@bar.com"}}'
+      assert.equal res.body, '{"outcome":"failure","lead":{"id":"123","email":"foo@bar.com"},"price":"0"}'
 
 
     it 'should respond with text xml', ->
-      res = integration.response(baseRequest('text/xml'), vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest('text/xml'), @vars, ['outcome', 'lead.id', 'lead.email'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'text/xml'
-      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n</result>'
+      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n  <price>0</price>\n</result>'
 
     it 'should respond with application xml', ->
-      res = integration.response(baseRequest(), vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest(), @vars, ['outcome', 'lead.id', 'lead.email'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'application/xml'
-      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n</result>'
+      assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n  <price>0</price>\n</result>'
 
 
 baseRequest = (accept = null, querystring = '') ->

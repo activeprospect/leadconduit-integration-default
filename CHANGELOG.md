@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.8.0] - 2018-10-07
+### Added
+- capture price variable
+
 ## [2.7.8] - 2018-03-03
 ### Added
 - add metadata and icon
