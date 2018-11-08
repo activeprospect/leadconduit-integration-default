@@ -189,10 +189,8 @@ request.variables = ->
 # Response Function ------------------------------------------------------
 #
 
-response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
+response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   mimeType = selectMimeType(req.headers['Accept'])
-
-  price = if vars.outcome == 'success' then vars.cost else "0"
 
   body = null
   if mimeType == 'text/plain'
@@ -200,14 +198,12 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
     body += "lead_id:#{vars.lead.id}\n"
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
-    body += "price:#{price}\n"
+    body += "price:#{vars.price}\n"
   else
     json = {}
     for field in fieldIds
       json[field] = dotaccess.get(vars, field)?.valueOf()
     json = flat.unflatten(json)
-
-    json.price = price
 
     if mimeType == 'application/xml' or mimeType == 'text/xml'
       body = xmlbuilder.create(result: json).end(pretty: true)

@@ -240,13 +240,14 @@ describe 'Inbound Response', ->
       lead: { id: '123' }
       outcome: 'failure'
       reason: 'bad!'
+      price: 0
 
 
   it 'should respond with json', ->
     res = integration.response(baseRequest('application/json'), @vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 69
-    assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"},"price":"0"}'
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 67
+    assert.equal res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"},"price":0}'
 
 
   it 'should default to json', ->
@@ -283,8 +284,9 @@ describe 'Inbound Response', ->
   it 'should capture price variable', ->
     @vars = 
       outcome: 'success'
-      cost: "1.5"
+      price: "1.5"
       lead: { id: '123' }
+      
     res = integration.response(baseRequest('application/json'), @vars)
     assert.equal res.status, 201
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 55
@@ -300,22 +302,23 @@ describe 'Inbound Response', ->
           email: 'foo@bar.com'
         outcome: 'failure'
         reason: 'bad!'
+        price: 0
 
     it 'should respond with json', ->
-      res = integration.response(baseRequest('application/json'), @vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest('application/json'), @vars, ['outcome', 'lead.id', 'lead.email', 'price'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'application/json'
-      assert.equal res.body, '{"outcome":"failure","lead":{"id":"123","email":"foo@bar.com"},"price":"0"}'
+      assert.equal res.body, '{"outcome":"failure","lead":{"id":"123","email":"foo@bar.com"},"price":0}'
 
 
     it 'should respond with text xml', ->
-      res = integration.response(baseRequest('text/xml'), @vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest('text/xml'), @vars, ['outcome', 'lead.id', 'lead.email', 'price'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'text/xml'
       assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n  <price>0</price>\n</result>'
 
     it 'should respond with application xml', ->
-      res = integration.response(baseRequest(), @vars, ['outcome', 'lead.id', 'lead.email'])
+      res = integration.response(baseRequest(), @vars, ['outcome', 'lead.id', 'lead.email', 'price'])
       assert.equal res.status, 201
       assert.equal res.headers['Content-Type'], 'application/xml'
       assert.equal res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n  <price>0</price>\n</result>'
