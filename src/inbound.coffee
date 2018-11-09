@@ -235,7 +235,7 @@ response.variables = ->
     { name: 'lead.id', type: 'string', description: 'The lead identifier that the source should reference' },
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
-    { name: 'price', type: 'string', description: 'The price of the lead' }
+    { name: 'price', type: 'number', description: 'The price of the lead' }
   ]
 
 
