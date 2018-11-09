@@ -240,7 +240,6 @@ describe 'Inbound Response', ->
       lead: { id: '123' }
       outcome: 'failure'
       reason: 'bad!'
-      price: 0
 
 
   it 'should respond with json', ->
@@ -284,13 +283,13 @@ describe 'Inbound Response', ->
   it 'should capture price variable', ->
     @vars = 
       outcome: 'success'
-      price: "1.5"
+      price: 1.5
       lead: { id: '123' }
       
     res = integration.response(baseRequest('application/json'), @vars)
     assert.equal res.status, 201
-    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 55
-    assert.equal res.body, '{"outcome":"success","lead":{"id":"123"},"price":"1.5"}'
+    assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 53
+    assert.equal res.body, '{"outcome":"success","lead":{"id":"123"},"price":1.5}'
 
 
   describe 'With specified fields in response', ->
@@ -302,7 +301,6 @@ describe 'Inbound Response', ->
           email: 'foo@bar.com'
         outcome: 'failure'
         reason: 'bad!'
-        price: 0
 
     it 'should respond with json', ->
       res = integration.response(baseRequest('application/json'), @vars, ['outcome', 'lead.id', 'lead.email', 'price'])

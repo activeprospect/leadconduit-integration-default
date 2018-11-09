@@ -198,12 +198,14 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
     body += "lead_id:#{vars.lead.id}\n"
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
-    body += "price:#{vars.price}\n"
+    body += "price:#{vars.price || 0}\n"
   else
     json = {}
     for field in fieldIds
       json[field] = dotaccess.get(vars, field)?.valueOf()
     json = flat.unflatten(json)
+
+    json.price ?= 0
 
     if mimeType == 'application/xml' or mimeType == 'text/xml'
       body = xmlbuilder.create(result: json).end(pretty: true)
