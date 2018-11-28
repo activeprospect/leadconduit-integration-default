@@ -189,7 +189,7 @@ request.variables = ->
 # Response Function ------------------------------------------------------
 #
 
-response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
+response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
   body = null
@@ -198,11 +198,14 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id']) ->
     body += "lead_id:#{vars.lead.id}\n"
     body += "outcome:#{vars.outcome}\n"
     body += "reason:#{vars.reason}\n"
+    body += "price:#{vars.price || 0}\n"
   else
     json = {}
     for field in fieldIds
       json[field] = dotaccess.get(vars, field)?.valueOf()
     json = flat.unflatten(json)
+
+    json.price ?= 0
 
     if mimeType == 'application/xml' or mimeType == 'text/xml'
       body = xmlbuilder.create(result: json).end(pretty: true)
@@ -234,6 +237,7 @@ response.variables = ->
     { name: 'lead.id', type: 'string', description: 'The lead identifier that the source should reference' },
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
+    { name: 'price', type: 'number', description: 'The price of the lead' }
   ]
 
 
