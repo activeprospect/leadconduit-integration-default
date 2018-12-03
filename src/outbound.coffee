@@ -32,6 +32,8 @@ request = (vars) ->
     for key, value of flat.flatten(vars.default.custom, safe: true)
       content[key] = value?.valueOf() if value?
 
+  content.price = if (vars.price) then vars.price.valueOf() else 0
+
   if method == 'GET'
 
     # build query string, merging 'over' existing querystring
@@ -89,6 +91,8 @@ response = (vars, req, res) ->
     event =
       outcome: vars.default_outcome or 'error'
       reason: event.reason or event.message or 'Unrecognized response'
+  
+  event.price = if (vars.price) then vars.price.valueOf() else 0
 
   event
 
@@ -105,12 +109,14 @@ request.variables = ->
     { name: 'default_outcome', description: 'Outcome to return if recipient returns none (success, failure, error). If not specified, "error" will be used.', type: 'string' }
     { name: 'lead.*', type: 'wildcard', required: true }
     { name: 'default.custom.*', type: 'wildcard', required: false }
+    { name: 'price', type: 'number', description: 'The price of the lead' }
   ]
 
 response.variables = ->
   [
     { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' }
     { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
+    { name: 'price', type: 'number', description: 'The price of the lead' }
   ]
 
 

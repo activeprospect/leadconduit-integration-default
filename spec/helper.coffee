@@ -19,6 +19,7 @@ module.exports =
           last_name: 'Blow'
           email: 'JBLOW@TEST.COM'
           phone_1: '512-789-1111'
+        price: 1.5
 
       for key, value of override
         dotaccess.set(vars, key, value, true)
