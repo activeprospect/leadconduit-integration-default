@@ -20,31 +20,31 @@ describe 'Outbound Request', ->
 
   it 'should encode content sent via get as querystring', ->
     url =  integration.request(variables(method: 'get')).url
-    assert.equal url, 'http://externalservice/?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+    assert.equal url, 'http://externalservice/?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5'
 
 
   it 'should merge content sent via get over querystring', ->
     req = integration.request(variables(url: 'http://externalservice?first_name=Bobby&aff_id=123', method: 'get')).url
-    assert.equal req, 'http://externalservice/?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+    assert.equal req, 'http://externalservice/?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5'
 
 
   it 'should handle null variable', ->
     url = integration.request(variables(lead: { first_name: null }, method: 'get')).url
-    assert.equal url, 'http://externalservice/?first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+    assert.equal url, 'http://externalservice/?first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5'
 
 
   it 'should handle undefined variable', ->
     url = integration.request(variables(lead: { first_name: undefined }, method: 'get')).url
-    assert.equal url, 'http://externalservice/?last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+    assert.equal url, 'http://externalservice/?last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5'
 
 
   it 'should encode content sent as post', ->
     body = integration.request(variables()).body
-    assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111'
+    assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5'
 
 
   it 'should set content length of post', ->
-    assert.equal integration.request(variables()).headers['Content-Length'], 71
+    assert.equal integration.request(variables()).headers['Content-Length'], 81
 
 
   it 'should set content type of post', ->
@@ -53,21 +53,21 @@ describe 'Outbound Request', ->
 
   it 'should handle dot notation vars', ->
     url = integration.request(url: 'http://externalservice', method: 'get', lead: { 'deeply.nested.var': 'Hola' }).url
-    assert.equal url, 'http://externalservice/?deeply.nested.var=Hola'
+    assert.equal url, 'http://externalservice/?deeply.nested.var=Hola&price=0'
 
 
   it 'should handle deeply nested vars', ->
     url = integration.request(url: 'http://externalservice', method: 'get', lead: { deeply: { nested: { var: 'Hola' } } }).url
-    assert.equal url, 'http://externalservice/?deeply.nested.var=Hola'
+    assert.equal url, 'http://externalservice/?deeply.nested.var=Hola&price=0'
 
 
   it 'should handle new format custom fields', ->
     body = integration.request(variables(default: {custom: {favorite_color: 'pink'}})).body
-    assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&favorite_color=pink'
+    assert.equal body, 'first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&favorite_color=pink&price=1.5'
 
   it 'should overwrite standard fields with custom fields of the same name', ->
     body = integration.request(variables(default: custom: email: 'custom@email.com')).body
-    assert.equal body, 'first_name=Joe&last_name=Blow&email=custom%40email.com&phone_1=5127891111'
+    assert.equal body, 'first_name=Joe&last_name=Blow&email=custom%40email.com&phone_1=5127891111&price=1.5'
 
 describe 'Outbound Validate', ->
 
@@ -159,6 +159,7 @@ describe 'Outbound Response', ->
         last_name: 'Blow'
         email: 'jblow@test.com'
         phone_1: '5127891111'
+      price: 1.5
     assert.deepEqual event, expected
 
 
@@ -167,7 +168,7 @@ describe 'Outbound Response', ->
     res.headers['Content-Type'] = 'text/xml'
     res.body = '<status>Error</status><reason>Please send in the mg_site_id and mg_cid as part of your request. Request Parameter = mg_site_id</reason>'
     event = integration.response(vars, req, res)
-    assert.deepEqual event, outcome: 'error', reason: 'Unrecognized response'
+    assert.deepEqual event, outcome: 'error', reason: 'Unrecognized response', price: 1.5
 
 
   it 'should parse JSON response', ->
@@ -179,6 +180,7 @@ describe 'Outbound Response', ->
         last_name: 'Blow'
         email: 'jblow@test.com'
         phone_1: '5127891111'
+      price: 1.5
     res.body = JSON.stringify(expected)
     event = integration.response(vars, req, res)
     assert.deepEqual event, expected
@@ -188,6 +190,7 @@ describe 'Outbound Response', ->
     expected =
       outcome: 'error'
       reason: 'Flow is disabled'
+      price: 1.5
 
     res =
       status: 403

@@ -183,19 +183,19 @@ describe 'Inbound examples', ->
 
   it 'should have uri', ->
     examples = integration.request.examples('123', '345', {})
-    for uri in _.pluck(examples, 'uri')
+    for uri in _.map(examples, 'uri')
       assert.equal url.parse(uri).href, '/flows/123/sources/345/submit'
 
 
   it 'should have method', ->
     examples = integration.request.examples('123', '345', {})
-    for method in _.pluck(examples, 'method')
+    for method in _.map(examples, 'method')
       assert method == 'GET' or method == 'POST'
 
 
   it 'should have headers', ->
     examples = integration.request.examples('123', '345', {})
-    for headers in _.pluck(examples, 'headers')
+    for headers in _.map(examples, 'headers')
       assert _.isPlainObject(headers)
       assert headers['Accept']
 
@@ -203,7 +203,7 @@ describe 'Inbound examples', ->
   it 'should include redir url in query string', ->
     redir = 'http://foo.com?bar=baz'
     examples = integration.request.examples('123', '345', redir_url: redir)
-    for uri in _.pluck(examples, 'uri')
+    for uri in _.map(examples, 'uri')
       query = url.parse(uri, query: true).query
       assert.equal query.redir_url, redir
 
