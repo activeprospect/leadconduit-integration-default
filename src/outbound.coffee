@@ -91,8 +91,8 @@ response = (vars, req, res) ->
     event =
       outcome: vars.default_outcome or 'error'
       reason: event.reason or event.message or 'Unrecognized response'
-  
-  event.price = if (vars.price) then vars.price.valueOf() else 0
+
+  event.price = if (event.price) then parseFloat(event.price) else 0
 
   event
 
