@@ -91,9 +91,7 @@ response = (vars, req, res) ->
     event =
       outcome: vars.default_outcome or 'error'
       reason: event.reason or event.message or 'Unrecognized response'
-  
-  event.price = if (vars.price) then vars.price.valueOf() else 0
-
+      
   event
 
 

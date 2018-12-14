@@ -159,7 +159,7 @@ describe 'Outbound Response', ->
         last_name: 'Blow'
         email: 'jblow@test.com'
         phone_1: '5127891111'
-      price: 1.5
+      price: '1.5'
     assert.deepEqual event, expected
 
 
@@ -168,7 +168,7 @@ describe 'Outbound Response', ->
     res.headers['Content-Type'] = 'text/xml'
     res.body = '<status>Error</status><reason>Please send in the mg_site_id and mg_cid as part of your request. Request Parameter = mg_site_id</reason>'
     event = integration.response(vars, req, res)
-    assert.deepEqual event, outcome: 'error', reason: 'Unrecognized response', price: 1.5
+    assert.deepEqual event, outcome: 'error', reason: 'Unrecognized response'
 
 
   it 'should parse JSON response', ->
@@ -190,7 +190,6 @@ describe 'Outbound Response', ->
     expected =
       outcome: 'error'
       reason: 'Flow is disabled'
-      price: 1.5
 
     res =
       status: 403
@@ -220,6 +219,7 @@ xmlBody = ->
         <email>jblow@test.com</email>
         <phone_1>5127891111</phone_1>
       </lead>
+      <price>1.5</price>
     </result>
   '''
 
