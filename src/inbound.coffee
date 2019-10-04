@@ -81,7 +81,11 @@ request = (req) ->
 
       # if form URL encoding, convert dot notation keys
       if mimeType == 'application/x-www-form-urlencoded'
-        parsed = flat.unflatten(parsed)
+        try
+          parsed = flat.unflatten(parsed)
+        catch e
+          formEncodedError = e.toString()
+          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Unable to parse body -- #{formEncodedError}.")
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'
