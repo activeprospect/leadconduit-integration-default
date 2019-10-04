@@ -85,7 +85,7 @@ request = (req) ->
           parsed = flat.unflatten(parsed)
         catch e
           formEncodedError = e.toString()
-          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Body does not contain form-encoded data or form-encoded data is unparseable -- #{formEncodedError}.")
+          throw new HttpError(400, {'Content-Type': 'text/plain'}, "Unable to parse body -- #{formEncodedError}.")
 
       # if XML, turn doc into an object
       if mimeType == 'application/xml' or mimeType == 'text/xml'

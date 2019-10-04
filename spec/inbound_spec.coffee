@@ -60,7 +60,7 @@ describe 'Inbound Request', ->
       assert.fail("expected an error to be thrown when form-encoded content cannot be parsed")
     catch e
       assert.equal e.status, 400
-      assert.equal e.body, "Body does not contain form-encoded data or form-encoded data is unparseable -- TypeError: Cannot read property 'company' of undefined."
+      assert.equal e.body, "Unable to parse body -- TypeError: Cannot read property 'company' of undefined."
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
 
