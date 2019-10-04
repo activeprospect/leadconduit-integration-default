@@ -53,6 +53,16 @@ describe 'Inbound Request', ->
       assert.equal e.body, 'Body does not contain XML or XML is unparseable -- Error: Non-whitespace before first tag. Line: 0 Column: 1 Char: x.'
       assert.deepEqual e.headers, 'Content-Type': 'text/plain'
 
+  it 'should throw an error when it cant parse form-encoded data', ->
+    body = 'first_name=SolarReviews&&postal_code=92014&utility=SCE&price=98&utility.electric.company.name=SCE&electric_monthly_amount_oos=150&email=Test@solarreviews123.com'
+    try
+      integration.request(method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': body.length, 'Content-Type': 'application/x-www-form-urlencoded'}, body: body)
+      assert.fail("expected an error to be thrown when form-encoded content cannot be parsed")
+    catch e
+      assert.equal e.status, 400
+      assert.equal e.body, "Body does not contain form-encoded data or form-encoded data is unparseable -- TypeError: Cannot read property 'company' of undefined."
+      assert.deepEqual e.headers, 'Content-Type': 'text/plain'
+
 
    it 'should not parse empty body', ->
       req =

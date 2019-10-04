@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.8.2] - 2019-10-04
+### Fixed
+- Add error handling around parsing for form-encoded data
+
 ## [2.8.1] - 2018-12-03
 ### Added
 - Send and capture price in outbound response/request
