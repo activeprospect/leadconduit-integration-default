@@ -196,25 +196,12 @@ request.variables = ->
 response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
-  body = null
-  if mimeType == 'text/plain'
-    body = ''
-    body += "lead_id:#{vars.lead.id}\n"
-    body += "outcome:#{vars.outcome}\n"
-    body += "reason:#{vars.reason}\n"
-    body += "price:#{vars.price || 0}\n"
-  else
-    json = {}
-    for field in fieldIds
-      json[field] = dotaccess.get(vars, field)?.valueOf()
-    json = flat.unflatten(json)
+  # do not attempt to include lead id on ping responses. the handler does not provide it.
+  if isPing(req)
+    fieldIds = fieldIds.filter (fieldId) ->
+      fieldId != 'lead.id'
 
-    json.price ?= 0
-
-    if mimeType == 'application/xml' or mimeType == 'text/xml'
-      body = xmlbuilder.create(result: json).end(pretty: true)
-    else
-      body = JSON.stringify(json)
+  body = buildBody(mimeType, fieldIds, vars)
 
   # parse the query string
   uri = url.parse(req.uri)
@@ -236,18 +223,54 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   body: body
 
 
-response.variables = ->
-  [
-    { name: 'lead.id', type: 'string', description: 'The lead identifier that the source should reference' },
-    { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
-    { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
-    { name: 'price', type: 'number', description: 'The price of the lead' }
-  ]
+response.variables = (forPing) ->
+  if forPing
+    [
+      { name: 'outcome', type: 'string', description: 'The outcome of the ping (default is success)' },
+      { name: 'reason', type: 'string', description: 'If the ping outcome was a failure, this is the reason' }
+      { name: 'price', type: 'number', description: 'The bid price of the lead' }
+    ]
+  else
+    [
+      { name: 'lead.id', type: 'string', description: 'The lead identifier that the source should reference' },
+      { name: 'outcome', type: 'string', description: 'The outcome of the transaction (default is success)' },
+      { name: 'reason', type: 'string', description: 'If the outcome was a failure, this is the reason' }
+      { name: 'price', type: 'number', description: 'The price of the lead' }
+    ]
 
 
 #
 # Helpers ----------------------------------------------------------------
 #
+
+buildBody = (mimeType, fieldIds, vars) ->
+  body = null
+  if mimeType == 'text/plain'
+    body = ''
+    body += "lead_id:#{vars.lead.id}\n" if fieldIds.include('lead.id')
+    body += "outcome:#{vars.outcome}\n" if fieldIds.include('outcome')
+    body += "reason:#{vars.reason}\n" if fieldIds.include('reason')
+    body += "price:#{vars.price || 0}\n" if fieldIds.include('price')
+  else
+    json = {}
+    for field in fieldIds
+      json[field] = dotaccess.get(vars, field)?.valueOf()
+    json = flat.unflatten(json)
+
+    json.price ?= 0
+
+    if mimeType == 'application/xml' or mimeType == 'text/xml'
+      body = xmlbuilder.create(result: json).end(pretty: true)
+    else
+      body = JSON.stringify(json)
+  body
+
+
+isPing = (req) ->
+  return false unless req?.uri
+  uri = url.parse(req.uri)
+  uri?.pathname?.match(/\/ping$/)
+
 
 selectMimeType = (contentType) ->
   contentType = contentType or 'application/json'
@@ -270,7 +293,8 @@ normalizeTrustedFormCertUrl = (obj) ->
 
 module.exports =
   name: 'Standard'
-  request: request,
+  request: request
   response: response
+  pingable: true
 
 

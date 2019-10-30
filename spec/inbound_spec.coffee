@@ -301,6 +301,18 @@ describe 'Inbound Response', ->
     assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 53
     assert.equal res.body, '{"outcome":"success","lead":{"id":"123"},"price":1.5}'
 
+  describe 'ping', ->
+
+    it 'should not respond with lead id', ->
+      req = baseRequest('application/json')
+      req.uri = '/flows/123/sources/ping'
+      # The LeadConduit handler omits the lead ID on ping requests
+      delete @vars.lead.id
+      res = integration.response(req, @vars)
+      assert.equal res.status, 201
+      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 47
+      assert.equal res.body, '{"outcome":"failure","reason":"bad!","price":0}'
+
 
   describe 'With specified fields in response', ->
 
@@ -333,7 +345,7 @@ describe 'Inbound Response', ->
 
 
 baseRequest = (accept = null, querystring = '') ->
-  uri: "/whatever#{querystring}"
+  uri: "/flows/123/sources/456/submit#{querystring}"
   method: 'post'
   version: '1.1'
   headers:
