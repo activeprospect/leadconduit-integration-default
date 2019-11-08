@@ -196,8 +196,18 @@ request.variables = ->
 response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   mimeType = selectMimeType(req.headers['Accept'])
 
-  # do not attempt to include lead id on ping responses. the handler does not provide it.
+  statusCode = 201
+
+  # special behavior for ping requests:
+  # 1. do not attempt to include lead id on ping responses. the handler does not provide it.
+  # 2. if the price is $0, return 'failure'
+  # 3. return HTTP 200 instead of HTTP 201
   if isPing(req)
+    # set outcome to failure if necessary
+    vars.outcome = 'failure' unless vars.price > 0
+    # return 200
+    statusCode = 200
+    # omit lead id
     fieldIds = fieldIds.filter (fieldId) ->
       fieldId != 'lead.id'
 
@@ -210,7 +220,7 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   # find the redir url
   redirUrl = if _.isArray(query.redir_url) then query.redir_url[0] else query.redir_url
 
-  status = if redirUrl? then 303 else 201
+  status = if redirUrl? then 303 else statusCode
 
   headers =
     'Content-Type': mimeType,
@@ -254,7 +264,8 @@ buildBody = (mimeType, fieldIds, vars) ->
   else
     json = {}
     for field in fieldIds
-      json[field] = dotaccess.get(vars, field)?.valueOf()
+      value = dotaccess.get(vars, field)?.valueOf()
+      json[field] = value unless value == undefined
     json = flat.unflatten(json)
 
     json.price ?= 0
@@ -269,7 +280,7 @@ buildBody = (mimeType, fieldIds, vars) ->
 isPing = (req) ->
   return false unless req?.uri
   uri = url.parse(req.uri)
-  uri?.pathname?.match(/\/ping$/)
+  !!uri?.pathname?.match(/\/ping$/)
 
 
 selectMimeType = (contentType) ->

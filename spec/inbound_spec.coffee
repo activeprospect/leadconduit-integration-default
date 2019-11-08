@@ -308,10 +308,26 @@ describe 'Inbound Response', ->
       req.uri = '/flows/123/sources/ping'
       # The LeadConduit handler omits the lead ID on ping requests
       delete @vars.lead.id
+      @vars.outcome = 'success'
+      @vars.reason = null
+      @vars.price = 10
       res = integration.response(req, @vars)
-      assert.equal res.status, 201
-      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length': 47
-      assert.equal res.body, '{"outcome":"failure","reason":"bad!","price":0}'
+      assert.equal res.status, 200
+      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length':32
+      assert.equal res.body, '{"outcome":"success","price":10}'
+
+    it 'should respond with failure on $0 price', ->
+      req = baseRequest('application/json')
+      req.uri = '/flows/123/sources/ping'
+      # The LeadConduit handler omits the lead ID on ping requests
+      delete @vars.lead.id
+      @vars.outcome = 'success'
+      @vars.reason = null
+      @vars.price = 0
+      res = integration.response(req, @vars)
+      assert.equal res.status, 200
+      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length':31
+      assert.equal res.body, '{"outcome":"failure","price":0}'
 
 
   describe 'With specified fields in response', ->
