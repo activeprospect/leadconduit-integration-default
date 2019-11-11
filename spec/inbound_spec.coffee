@@ -326,8 +326,8 @@ describe 'Inbound Response', ->
       @vars.price = 0
       res = integration.response(req, @vars)
       assert.equal res.status, 200
-      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length':31
-      assert.equal res.body, '{"outcome":"failure","price":0}'
+      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length':49
+      assert.equal res.body, '{"outcome":"failure","reason":"no bid","price":0}'
 
 
   describe 'With specified fields in response', ->

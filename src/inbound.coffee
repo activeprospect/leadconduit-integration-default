@@ -204,7 +204,9 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
   # 3. return HTTP 200 instead of HTTP 201
   if isPing(req)
     # set outcome to failure if necessary
-    vars.outcome = 'failure' unless vars.price > 0
+    unless vars.price > 0
+      vars.outcome = 'failure'
+      vars.reason = 'no bid'
     # return 200
     statusCode = 200
     # omit lead id
