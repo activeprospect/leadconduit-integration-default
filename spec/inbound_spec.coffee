@@ -330,6 +330,20 @@ describe 'Inbound Response', ->
       assert.equal res.body, '{"outcome":"failure","reason":"no bid","price":0}'
 
 
+    it 'should not overwrite reason', ->
+      req = baseRequest('application/json')
+      req.uri = '/flows/123/sources/ping'
+      # The LeadConduit handler omits the lead ID on ping requests
+      delete @vars.lead.id
+      @vars.outcome = 'failure'
+      @vars.reason = 'terrible'
+      @vars.price = 0
+      res = integration.response(req, @vars)
+      assert.equal res.status, 200
+      assert.deepEqual res.headers, 'Content-Type': 'application/json', 'Content-Length':51
+      assert.equal res.body, '{"outcome":"failure","reason":"terrible","price":0}'
+
+
   describe 'With specified fields in response', ->
 
     beforeEach -> 

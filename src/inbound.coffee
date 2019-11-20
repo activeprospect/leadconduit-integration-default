@@ -206,7 +206,7 @@ response = (req, vars, fieldIds = ['outcome', 'reason', 'lead.id', 'price']) ->
     # set outcome to failure if necessary
     unless vars.price > 0
       vars.outcome = 'failure'
-      vars.reason = 'no bid'
+      vars.reason ?= 'no bid'
     # return 200
     statusCode = 200
     # omit lead id
