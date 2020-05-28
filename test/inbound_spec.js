@@ -19,7 +19,7 @@ describe('Inbound Request', function() {
   it('should not allow patch', () => assertMethodNotAllowed('patch'));
 
 
-  it('should require content type header for posts with content', function() {
+  it('should require content type header for posts with content', () => {
     try {
       integration.request({method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '1' }});
       assert.fail("expected an error to be thrown when no content type is specified");
@@ -31,7 +31,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should require supported mimetype', function() {
+  it('should require supported mimetype', () => {
     try {
       integration.request({method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': '1', 'Content-Type': 'Monkies' }});
       assert.fail("expected an error to be thrown when no content type is specified");
@@ -43,7 +43,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should throw an error when it cant parse xml', function() {
+  it('should throw an error when it cant parse xml', () => {
     const body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken';
     try {
       integration.request({method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': body.length, 'Content-Type': 'application/xml'}, body});
@@ -55,7 +55,7 @@ describe('Inbound Request', function() {
     }
   });
 
-  it('should throw an error when it cant parse form-encoded data', function() {
+  it('should throw an error when it cant parse form-encoded data', () => {
     const body = 'first_name=SolarReviews&&postal_code=92014&utility=SCE&price=98&utility.electric.company.name=SCE&electric_monthly_amount_oos=150&email=Test@solarreviews123.com';
     try {
       integration.request({method: 'post', uri: '/flows/12345/sources/12345/submit', headers: { 'Content-Length': body.length, 'Content-Type': 'application/x-www-form-urlencoded'}, body});
@@ -68,7 +68,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should not parse empty body', function() {
+  it('should not parse empty body', () => {
       const req = {
         method: 'POST',
         uri: '/flows/12345/sources/12345/submit?first_name=Joe&last_name=Blow&phone_1=5127891111',
@@ -83,13 +83,13 @@ describe('Inbound Request', function() {
    });
 
 
-  it('should parse posted form url encoded body', function() {
+  it('should parse posted form url encoded body', () => {
     const body = 'first_name=Joe&last_name=Blow&email=jblow@test.com&phone_1=5127891111';
     assertParses('application/x-www-form-urlencoded', body);
   });
 
 
-  it('should parse nested form url encoded body', function() {
+  it('should parse nested form url encoded body', () => {
     const body = 'first_name=Joe&callcenter.additional_services=script+writing';
     assertParses('application/x-www-form-urlencoded', body, {
       first_name: 'Joe',
@@ -101,19 +101,19 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should parse xxTrustedFormCertUrl from request body', function() {
+  it('should parse xxTrustedFormCertUrl from request body', () => {
     const body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken';
     assertParses('application/x-www-form-urlencoded', body, {trustedform_cert_url: 'https://cert.trustedform.com/testtoken'});
   });
 
 
-  it('should parse xxTrustedFormCertUrl case insensitively', function() {
+  it('should parse xxTrustedFormCertUrl case insensitively', () => {
     const body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken';
     assertParses('application/x-www-form-urlencoded', body, {trustedform_cert_url: 'https://cert.trustedform.com/testtoken'});
   });
 
 
-  it('should parse query string on POST', function() {
+  it('should parse query string on POST', () => {
     const body = 'param1=val1';
     const req = {
       method: 'POST',
@@ -129,7 +129,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should return 400 on invalid redir_url', function() {
+  it('should return 400 on invalid redir_url', () => {
     const req = {
       method: 'POST',
       uri: '/flows/12345/sources/12345/submit?redir_url=scooby.doo',
@@ -147,7 +147,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should not error on multiple redir_url values', function() {
+  it('should not error on multiple redir_url values', () => {
     const req = {
       method: 'POST',
       uri: '/flows/12345/sources/12345/submit?redir_url=http://foo.com&first_name=Joe&redir_url=http://bar.com',
@@ -160,7 +160,7 @@ describe('Inbound Request', function() {
   }); // just ensure request() finished without error
 
 
-  it('should parse xxTrustedFormCertUrl from query string', function() {
+  it('should parse xxTrustedFormCertUrl from query string', () => {
     const req = {
       method: 'GET',
       uri: '/flows/12345/sources/12345/submit?xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken',
@@ -171,13 +171,13 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should parse posted json body', function() {
+  it('should parse posted json body', () => {
     const body = '{"first_name":"Joe","last_name":"Blow","email":"jblow@test.com","phone_1":"5127891111"}';
     assertParses('application/json', body);
   });
 
 
-  it('should parse text xml', function() {
+  it('should parse text xml', () => {
     const body = `\
 <lead>
   <first_name>Joe</first_name>
@@ -191,7 +191,7 @@ describe('Inbound Request', function() {
   });
 
 
-  it('should parse posted application xml', function() {
+  it('should parse posted application xml', () => {
     const body = `\
 <lead>
   <first_name>Joe</first_name>
@@ -217,23 +217,23 @@ describe('Inbound Params', () =>
 
 
 
-describe('Inbound examples', function() {
+describe('Inbound examples', () => {
 
-  it('should have uri', function() {
+  it('should have uri', () => {
     const examples = integration.request.examples('123', '345', {});
     Array.from(_.map(examples, 'uri')).map((uri) =>
       assert.equal(url.parse(uri).href, '/flows/123/sources/345/submit'));
   });
 
 
-  it('should have method', function() {
+  it('should have method', () => {
     const examples = integration.request.examples('123', '345', {});
     Array.from(_.map(examples, 'method')).map((method) =>
       assert((method === 'GET') || (method === 'POST')));
   });
 
 
-  it('should have headers', function() {
+  it('should have headers', () => {
     const examples = integration.request.examples('123', '345', {});
     for (let headers of Array.from(_.map(examples, 'headers'))) {
       assert(_.isPlainObject(headers));
@@ -242,7 +242,7 @@ describe('Inbound examples', function() {
 });
 
 
-  it('should include redir url in query string', function() {
+  it('should include redir url in query string', () => {
     const redir = 'http://foo.com?bar=baz';
     const examples = integration.request.examples('123', '345', {redir_url: redir});
     for (let uri of Array.from(_.map(examples, 'uri'))) {
@@ -252,7 +252,7 @@ describe('Inbound examples', function() {
   });
 
 
-  it('should properly encode URL encoded request body', function() {
+  it('should properly encode URL encoded request body', () => {
     const params = {
       first_name: 'alex',
       email: 'alex@test.com'
@@ -264,7 +264,7 @@ describe('Inbound examples', function() {
   });
 
 
-  it('should properly encode XML request body', function() {
+  it('should properly encode XML request body', () => {
     const examples = integration.request.examples('123', '345', {first_name: 'alex', email: 'alex@test.com'}).filter(example => example.headers['Content-Type'] != null ? example.headers['Content-Type'].match(/xml$/) : undefined);
     for (let example of Array.from(examples)) {
       assert.equal(example.body, '<?xml version="1.0"?>\n<lead>\n  <first_name>alex</first_name>\n  <email>alex@test.com</email>\n</lead>');
@@ -272,7 +272,7 @@ describe('Inbound examples', function() {
   });
 
 
-  it('should properly encode JSON request body', function() {
+  it('should properly encode JSON request body', () => {
     const examples = integration.request.examples('123', '345', {first_name: 'alex', email: 'alex@test.com'}).filter(example => example.headers['Content-Type'] != null ? example.headers['Content-Type'].match(/json$/) : undefined);
     for (let example of Array.from(examples)) {
       assert.equal(example.body, '{\n  "first_name": "alex",\n  "email": "alex@test.com"\n}');
@@ -282,9 +282,9 @@ describe('Inbound examples', function() {
 
 
 
-describe('Inbound Response', function() {
+describe('Inbound Response', () => {
 
-  beforeEach(function() { 
+  beforeEach(() => {
     this.vars = {
       lead: { id: '123' },
       outcome: 'failure',
@@ -293,7 +293,7 @@ describe('Inbound Response', function() {
   });
 
 
-  it('should respond with json', function() {
+  it('should respond with json', () => {
     const res = integration.response(baseRequest('application/json'), this.vars);
     assert.equal(res.status, 201);
     assert.deepEqual(res.headers, {'Content-Type': 'application/json', 'Content-Length': 67});
@@ -301,14 +301,14 @@ describe('Inbound Response', function() {
   });
 
 
-  it('should default to json', function() {
+  it('should default to json', () => {
     const res = integration.response(baseRequest('*/*'), this.vars);
     assert.equal(res.status, 201);
     assert.deepEqual(res.headers['Content-Type'],  'application/json');
   });
 
 
-  it('should respond with text xml', function() {
+  it('should respond with text xml', () => {
     const res = integration.response(baseRequest('text/xml'), this.vars);
     assert.equal(res.status, 201);
     assert.deepEqual(res.headers, {'Content-Type': 'text/xml', 'Content-Length': 148});
@@ -316,7 +316,7 @@ describe('Inbound Response', function() {
   });
 
 
-  it('should respond with application xml', function() {
+  it('should respond with application xml', () => {
     const res = integration.response(baseRequest(), this.vars);
     assert.equal(res.status, 201);
     assert.deepEqual(res.headers, {'Content-Type': 'application/xml', 'Content-Length': 148});
@@ -324,20 +324,20 @@ describe('Inbound Response', function() {
   });
 
 
-  it('should redirect', function() {
+  it('should redirect', () => {
     const res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip'), this.vars);
     assert.equal(res.status, 303);
     assert.equal(res.headers.Location, 'http://foo/bar?baz=bip');
   });
 
 
-  it('should not error on multiple redir_urls', function() {
+  it('should not error on multiple redir_urls', () => {
     const res = integration.response(baseRequest('application/xml', '?redir_url=http%3A%2F%2Ffoo%2Fbar%3Fbaz%3Dbip&something=else&redir_url=http%3A%2F%2Fshiny%2Fhappy%3Fpeople%3Dtrue'), this.vars);
     assert.equal(res.status, 303);
     assert.equal(res.headers.Location, 'http://foo/bar?baz=bip');
   });
 
-  it('should capture price variable', function() {
+  it('should capture price variable', () => {
     this.vars = { 
       outcome: 'success',
       price: 1.5,
@@ -350,9 +350,9 @@ describe('Inbound Response', function() {
     assert.equal(res.body, '{"outcome":"success","lead":{"id":"123"},"price":1.5}');
   });
 
-  describe('ping', function() {
+  describe('ping', () => {
 
-    it('should not respond with lead id', function() {
+    it('should not respond with lead id', () => {
       const req = baseRequest('application/json');
       req.uri = '/flows/123/sources/ping';
       // The LeadConduit handler omits the lead ID on ping requests
@@ -366,7 +366,7 @@ describe('Inbound Response', function() {
       assert.equal(res.body, '{"outcome":"success","price":10}');
     });
 
-    it('should respond with failure on $0 price', function() {
+    it('should respond with failure on $0 price', () => {
       const req = baseRequest('application/json');
       req.uri = '/flows/123/sources/ping';
       // The LeadConduit handler omits the lead ID on ping requests
@@ -381,7 +381,7 @@ describe('Inbound Response', function() {
     });
 
 
-    it('should not overwrite reason', function() {
+    it('should not overwrite reason', () => {
       const req = baseRequest('application/json');
       req.uri = '/flows/123/sources/ping';
       // The LeadConduit handler omits the lead ID on ping requests
@@ -397,9 +397,9 @@ describe('Inbound Response', function() {
   });
 
 
-  describe('With specified fields in response', function() {
+  describe('With specified fields in response', () => {
 
-    beforeEach(function() { 
+    beforeEach(() => {
       this.vars = {
         lead: { 
           id: '123',
@@ -410,7 +410,7 @@ describe('Inbound Response', function() {
       };
     });
 
-    it('should respond with json', function() {
+    it('should respond with json', () => {
       const res = integration.response(baseRequest('application/json'), this.vars, ['outcome', 'lead.id', 'lead.email', 'price']);
       assert.equal(res.status, 201);
       assert.equal(res.headers['Content-Type'], 'application/json');
@@ -418,14 +418,14 @@ describe('Inbound Response', function() {
     });
 
 
-    it('should respond with text xml', function() {
+    it('should respond with text xml', () => {
       const res = integration.response(baseRequest('text/xml'), this.vars, ['outcome', 'lead.id', 'lead.email', 'price']);
       assert.equal(res.status, 201);
       assert.equal(res.headers['Content-Type'], 'text/xml');
       assert.equal(res.body, '<?xml version="1.0"?>\n<result>\n  <outcome>failure</outcome>\n  <lead>\n    <id>123</id>\n    <email>foo@bar.com</email>\n  </lead>\n  <price>0</price>\n</result>');
     });
 
-    it('should respond with application xml', function() {
+    it('should respond with application xml', () => {
       const res = integration.response(baseRequest(), this.vars, ['outcome', 'lead.id', 'lead.email', 'price']);
       assert.equal(res.status, 201);
       assert.equal(res.headers['Content-Type'], 'application/xml');
