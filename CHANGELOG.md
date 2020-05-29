@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.8.3] - 2020-05-28
+### Fixed
+- Converted from coffeescript to es6
+
 ## [2.8.2] - 2019-10-04
 ### Fixed
 - Add error handling around parsing for form-encoded data
