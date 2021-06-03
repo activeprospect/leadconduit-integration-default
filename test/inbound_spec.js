@@ -300,6 +300,17 @@ describe('Inbound Response', () => {
     assert.equal(res.body, '{"outcome":"failure","reason":"bad!","lead":{"id":"123"},"price":0}');
   });
 
+  it('should correctly handle appended field paths with a numeric segment', () => {
+    this.vars.appended = { 5: { foo: 'bar' } };
+    const fieldIds = ['outcome', 'reason', 'appended.5.foo'];
+
+    const res = integration.response(baseRequest('application/json'), this.vars, fieldIds);
+
+    // numeric keys get forced to strings (5: {foo: bar} -> '5': {foo: bar})
+    assert.equal(res.body, '{"outcome":"failure","reason":"bad!","appended":{"\'5\'":{"foo":"bar"}},"price":0}');
+    assert.equal(res.status, 201);
+    assert.deepEqual(res.headers, {'Content-Type': 'application/json', 'Content-Length': 80});
+  });
 
   it('should default to json', () => {
     const res = integration.response(baseRequest('*/*'), this.vars);
@@ -338,12 +349,12 @@ describe('Inbound Response', () => {
   });
 
   it('should capture price variable', () => {
-    this.vars = { 
+    this.vars = {
       outcome: 'success',
       price: 1.5,
       lead: { id: '123' }
     };
-      
+
     const res = integration.response(baseRequest('application/json'), this.vars);
     assert.equal(res.status, 201);
     assert.deepEqual(res.headers, {'Content-Type': 'application/json', 'Content-Length': 53});
@@ -401,7 +412,7 @@ describe('Inbound Response', () => {
 
     beforeEach(() => {
       this.vars = {
-        lead: { 
+        lead: {
           id: '123',
           email: 'foo@bar.com'
         },

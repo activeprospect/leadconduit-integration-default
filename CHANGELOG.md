@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.9.3] - 2021-06-03
+### Fixed
+- Fixed verbose response for JSON with numeric ID ([ch23913](https://app.clubhouse.io/active-prospect/story/23913/pipedrive-form-post-delivery))
+
 ## [2.9.2] - 2020-05-28
 ### Fixed
 - Converted from coffeescript to es6
