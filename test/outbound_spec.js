@@ -191,7 +191,7 @@ describe('Outbound Response', () => {
   });
 });
 
-var assertMethodNotAllowed = function (method) {
+const assertMethodNotAllowed = function (method) {
   const vars = variables();
   vars.method = method;
   try {
@@ -199,7 +199,7 @@ var assertMethodNotAllowed = function (method) {
   } catch (error) {}
 };
 
-var xmlBody = () =>
+const xmlBody = () =>
   `\
 <result>
   <outcome>success</outcome>
