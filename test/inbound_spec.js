@@ -124,7 +124,7 @@ describe('Inbound Request', function () {
     };
     try {
       integration.request(req);
-      assert.fail(`expected ${method} to throw an error`);
+      assert.fail(`expected ${req.method} to throw an error`);
     } catch (e) {
       assert.equal(e.status, 400);
       assert.equal(e.body, 'Invalid redir_url');
@@ -403,7 +403,7 @@ describe('Inbound Response', () => {
   });
 });
 
-var baseRequest = function (accept = null, querystring) {
+const baseRequest = function (accept = null, querystring) {
   if (querystring == null) { querystring = ''; }
   return {
     uri: `/flows/123/sources/456/submit${querystring}`,
@@ -418,7 +418,7 @@ var baseRequest = function (accept = null, querystring) {
   };
 };
 
-var assertParses = function (contentType, body, expected) {
+const assertParses = function (contentType, body, expected) {
   const req = {
     method: 'POST',
     uri: '/flows/12345/sources/12345/submit',
@@ -442,7 +442,7 @@ var assertParses = function (contentType, body, expected) {
   assert.deepEqual(result, expected);
 };
 
-var assertMethodNotAllowed = function (method) {
+const assertMethodNotAllowed = function (method) {
   try {
     integration.request({ method });
     assert.fail(`expected ${method} to throw an error`);
