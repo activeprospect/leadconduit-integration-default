@@ -1,6 +1,6 @@
 const _ = require('lodash');
 const { assert } = require('chai');
-const url = require('url');
+const URL = require('url').URL;
 const querystring = require('querystring');
 const integration = require('../lib/inbound');
 
@@ -196,8 +196,10 @@ describe('Inbound Params', () =>
 describe('Inbound examples', () => {
   it('should have uri', () => {
     const examples = integration.request.examples('123', '345', {});
-    Array.from(_.map(examples, 'uri')).map((uri) =>
-      assert.equal(url.parse(uri).href, '/flows/123/sources/345/submit'));
+    Array.from(_.map(examples, 'uri')).forEach((uri) => {
+      const url = new URL(uri, 'https://next.leadconduit.com');
+      assert.equal(url.toString(), 'https://next.leadconduit.com/flows/123/sources/345/submit');
+    });
   });
 
   it('should have method', () => {
@@ -218,8 +220,8 @@ describe('Inbound examples', () => {
     const redir = 'http://foo.com?bar=baz';
     const examples = integration.request.examples('123', '345', { redir_url: redir });
     for (const uri of Array.from(_.map(examples, 'uri'))) {
-      const { query } = url.parse(uri, { query: true });
-      assert.equal(query.redir_url, redir);
+      const url = new URL(uri, 'https://next.leadconduit.com');
+      assert.equal(url.searchParams.get('redir_url'), redir);
     }
   });
 
