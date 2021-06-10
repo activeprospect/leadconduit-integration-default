@@ -2,15 +2,13 @@ const dotaccess = require('dotaccess');
 const flat = require('flat');
 const { types } = require('leadconduit-integration').test;
 
-
 module.exports = {
-  variables(requestVariables) {
+  variables (requestVariables) {
     const parse = types.parser(requestVariables);
 
-    return function(override) {
-
+    return function (override) {
       if (override == null) { override = {}; }
-      override = flat.flatten(override, {safe: true});
+      override = flat.flatten(override, { safe: true });
 
       const vars = {
         url: 'http://externalservice',
@@ -24,7 +22,7 @@ module.exports = {
         price: 1.5
       };
 
-      for (let key in override) {
+      for (const key in override) {
         const value = override[key];
         dotaccess.set(vars, key, value, true);
       }
