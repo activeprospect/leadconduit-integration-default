@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.9.4] - 2021-06-15
+### Fixed
+- Updated `mime-content` dependency ([ch25248](https://app.clubhouse.io/active-prospect/story/25248/update-integrations-that-use-old-node-mime-content-version))
+
 ## [2.9.3] - 2021-06-03
 ### Fixed
 - Fixed verbose response for JSON with numeric ID ([ch23913](https://app.clubhouse.io/active-prospect/story/23913/pipedrive-form-post-delivery))
