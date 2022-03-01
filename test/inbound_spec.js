@@ -94,6 +94,11 @@ describe('Inbound Request', function () {
     assertParses('application/x-www-form-urlencoded', body, { trustedform_cert_url: 'https://cert.trustedform.com/testtoken' });
   });
 
+  it('should parse xxTrustedFormPingUrl from the request body', () => {
+    const body = 'xxTrustedFormPingUrl=https://ping.trustedform.com/testtoken';
+    assertParses('application/x-www-form-urlencoded', body, { trustedform_ping_url: 'https://ping.trustedform.com/testtoken' });
+  });
+
   it('should parse xxTrustedFormCertUrl case insensitively', () => {
     const body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken';
     assertParses('application/x-www-form-urlencoded', body, { trustedform_cert_url: 'https://cert.trustedform.com/testtoken' });
