@@ -7,16 +7,16 @@ describe('Helpers', function () {
       assert.isFalse(isPing());
       assert.isFalse(isPing(null));
       assert.isFalse(isPing({}));
-      assert.isFalse(isPing('xyz'));
-      assert.isFalse(isPing(45));
-      assert.isFalse(isPing('https://next.leadconduit.com/flows/123/sources/456/pong'));
-      assert.isFalse(isPing('https://next.leadconduit.com/flows/123/sources/456/submit?type=ping'));
+      assert.isFalse(isPing({ uri: 'xyz' }));
+      assert.isFalse(isPing({ uri: 45 }));
+      assert.isFalse(isPing({ uri: 'https://next.leadconduit.com/flows/123/sources/456/pong' }));
+      assert.isFalse(isPing({ uri: 'https://next.leadconduit.com/flows/123/sources/456/submit?type=ping' }));
     });
 
     it('should recognize pings', () => {
-      assert.isTrue(isPing('/flows/123/sources/ping'));
-      assert.isTrue(isPing('https://next.leadconduit.com/flows/123/sources/456/ping'));
-      assert.isTrue(isPing('https://next.leadconduit.com/flows/123/sources/456/ping?type=whatever'));
+      assert.isTrue(isPing({ uri: '/flows/123/sources/ping' }));
+      assert.isTrue(isPing({ uri: 'https://next.leadconduit.com/flows/123/sources/456/ping' }));
+      assert.isTrue(isPing({ uri: 'https://next.leadconduit.com/flows/123/sources/456/ping?type=whatever' }));
     });
   });
 
