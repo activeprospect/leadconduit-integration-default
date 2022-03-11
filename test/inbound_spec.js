@@ -94,14 +94,64 @@ describe('Inbound Request', function () {
     assertParses('application/x-www-form-urlencoded', body, { trustedform_cert_url: 'https://cert.trustedform.com/testtoken' });
   });
 
-  it('should parse xxTrustedFormPingUrl from the request body', () => {
-    const body = 'xxTrustedFormPingUrl=https://ping.trustedform.com/testtoken';
-    assertParses('application/x-www-form-urlencoded', body, { trustedform_ping_url: 'https://ping.trustedform.com/testtoken' });
-  });
-
   it('should parse xxTrustedFormCertUrl case insensitively', () => {
     const body = 'XXTRUSTEDFORMCERTURL=https://cert.trustedform.com/testtoken';
     assertParses('application/x-www-form-urlencoded', body, { trustedform_cert_url: 'https://cert.trustedform.com/testtoken' });
+  });
+
+  it('should capture TF ping URL on LC ping', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/ping',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'xxTrustedFormPingUrl=https://ping.trustedform.com/0.whatever'
+    };
+    const result = integration.request(req);
+    assert.equal(result.trustedform_cert_url, 'https://ping.trustedform.com/0.whatever');
+  });
+
+  it('should capture TF cert URL on LC ping with only cert URL', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/ping',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'xxTrustedFormCertUrl=https://cert.trustedform.com/1.whomever'
+    };
+    const result = integration.request(req);
+    assert.equal(result.trustedform_cert_url, 'https://cert.trustedform.com/1.whomever');
+  });
+
+  it('should prefer TF ping URL on LC ping with both ping and cert URLs', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/ping',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'xxTrustedFormPingUrl=https://ping.trustedform.com/0.whatever&xxTrustedFormCertUrl=https://cert.trustedform.com/1.whomever'
+    };
+    const result = integration.request(req);
+    assert.equal(result.trustedform_cert_url, 'https://ping.trustedform.com/0.whatever');
+  });
+
+  it('should not capture TF ping URL on LC submission', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/submit',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'xxTrustedFormPingUrl=https://ping.trustedform.com/0.whatever'
+    };
+    const result = integration.request(req);
+    assert.isUndefined(result.trustedform_cert_url);
+  });
+
+  it('should prefer TF cert URL on LC submission with both ping and cert URLs', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/submit',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'xxTrustedFormPingUrl=https://ping.trustedform.com/0.whatever&xxTrustedFormCertUrl=https://cert.trustedform.com/1.whomever'
+    };
+    const result = integration.request(req);
+    assert.equal(result.trustedform_cert_url, 'https://cert.trustedform.com/1.whomever');
   });
 
   it('should parse query string on POST', () => {
