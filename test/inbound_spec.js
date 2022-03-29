@@ -110,6 +110,17 @@ describe('Inbound Request', function () {
     assert.equal(result.trustedform_cert_url, 'https://ping.trustedform.com/0.whatever');
   });
 
+  it('should capture TF ping URL on LC ping with snakecased parameter', () => {
+    const req = {
+      method: 'POST',
+      uri: '/flows/12345/sources/12345/ping',
+      headers: { 'Content-Length': 0, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: 'trustedform_ping_url=https://ping.trustedform.com/0.whatever'
+    };
+    const result = integration.request(req);
+    assert.equal(result.trustedform_cert_url, 'https://ping.trustedform.com/0.whatever');
+  });
+
   it('should capture TF cert URL on LC ping with only cert URL', () => {
     const req = {
       method: 'POST',
