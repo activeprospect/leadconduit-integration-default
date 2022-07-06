@@ -20,10 +20,14 @@
   "dependencies": {
     "dotaccess": "^1.0.5",
     "flat": "^1.3.0",
+    "ipaddr.js": "^2.0.1",
+    "is-valid-domain": "^0.1.6",
     "leadconduit-integration": "^0.2.0",
     "lodash": "^4.17.15",
     "mime-content": "~0.0.8",
     "mimeparse": "^0.1.4",
+    "private-ip": "^2.3.3",
+    "tlds": "^1.231.0",
     "xmlbuilder": "^7.0.0"
   },
   "devDependencies": {
