@@ -9,28 +9,29 @@ const requestVars = integration.request.variables().concat([
 ]);
 
 const variables = require('../test/helper').variables(requestVars);
+const baseUrl = 'http://externalservice.com';
 
 describe('Outbound Request', () => {
   it('should send accept header', () => assert.equal(integration.request(variables()).headers.Accept, 'application/json;q=0.9,text/xml;q=0.8,application/xml;q=0.7'));
 
   it('should encode content sent via get as querystring', () => {
     const { url } = integration.request(variables({ method: 'get' }));
-    assert.equal(url, 'http://externalservice/?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5');
+    assert.equal(url, `${baseUrl}/?first_name=Joe&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5`);
   });
 
   it('should merge content sent via get over querystring', () => {
-    const req = integration.request(variables({ url: 'http://externalservice?first_name=Bobby&aff_id=123', method: 'get' })).url;
-    assert.equal(req, 'http://externalservice/?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5');
+    const req = integration.request(variables({ url: `${baseUrl}?first_name=Bobby&aff_id=123`, method: 'get' })).url;
+    assert.equal(req, `${baseUrl}/?first_name=Joe&aff_id=123&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5`);
   });
 
   it('should handle null variable', () => {
     const { url } = integration.request(variables({ lead: { first_name: null }, method: 'get' }));
-    assert.equal(url, 'http://externalservice/?first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5');
+    assert.equal(url, `${baseUrl}/?first_name=&last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5`);
   });
 
   it('should handle undefined variable', () => {
     const { url } = integration.request(variables({ lead: { first_name: undefined }, method: 'get' }));
-    assert.equal(url, 'http://externalservice/?last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5');
+    assert.equal(url, `${baseUrl}/?last_name=Blow&email=jblow%40test.com&phone_1=5127891111&price=1.5`);
   });
 
   it('should encode content sent as post', () => {
@@ -43,13 +44,13 @@ describe('Outbound Request', () => {
   it('should set content type of post', () => assert.equal(integration.request(variables()).headers['Content-Type'], 'application/x-www-form-urlencoded'));
 
   it('should handle dot notation vars', () => {
-    const { url } = integration.request({ url: 'http://externalservice', method: 'get', lead: { 'deeply.nested.var': 'Hola' } });
-    assert.equal(url, 'http://externalservice/?deeply.nested.var=Hola&price=0');
+    const { url } = integration.request({ url: baseUrl, method: 'get', lead: { 'deeply.nested.var': 'Hola' } });
+    assert.equal(url, `${baseUrl}/?deeply.nested.var=Hola&price=0`);
   });
 
   it('should handle deeply nested vars', () => {
-    const { url } = integration.request({ url: 'http://externalservice', method: 'get', lead: { deeply: { nested: { var: 'Hola' } } } });
-    assert.equal(url, 'http://externalservice/?deeply.nested.var=Hola&price=0');
+    const { url } = integration.request({ url: baseUrl, method: 'get', lead: { deeply: { nested: { var: 'Hola' } } } });
+    assert.equal(url, `${baseUrl}/?deeply.nested.var=Hola&price=0`);
   });
 
   it('should handle new format custom fields', () => {
@@ -81,6 +82,18 @@ describe('Outbound Validate', () => {
     const vars = variables();
     vars.url = 'donkeykong';
     assert.equal(integration.validate(vars), 'URL must be valid');
+  });
+
+  it('should require public domain', () => {
+    const vars = variables();
+    vars.url = 'http://donkeykong.localhost';
+    assert.equal(integration.validate(vars), 'URL must be public');
+  });
+
+  it('should require public ip', () => {
+    const vars = variables();
+    vars.url = 'http://169.254.169.254/latest/meta-data/identity-credentials/ec2/security-credentials/ec2-instance/';
+    assert.equal(integration.validate(vars), 'URL must be public');
   });
 
   it('should not allow head', () => assertMethodNotAllowed('head'));
