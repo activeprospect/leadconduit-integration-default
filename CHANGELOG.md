@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.9.8] - 2022-07-06
+### Fixed
+- Fixed SSRF bug ([sc-40370](https://app.shortcut.com/active-prospect/story/40370/h1-lc-server-side-request-forgery-ssrf-within-leadconduit-standard-functionality))
+
 ## [2.9.7] - 2022-03-28
 ### Fixed
 - Add support for pings with `trustedform_ping_url` ([sc-37183](https://app.shortcut.com/active-prospect/story/37183/allow-a-trustedform-ping-url-to-be-passed-in-the-trustedfrom-cert-url-field-of-trustedform-data-service-integration))
