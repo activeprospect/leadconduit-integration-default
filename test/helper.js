@@ -11,7 +11,7 @@ module.exports = {
       override = flat.flatten(override, { safe: true });
 
       const vars = {
-        url: 'http://externalservice',
+        url: 'http://externalservice.com',
         method: 'post',
         lead: {
           first_name: 'Joe',
