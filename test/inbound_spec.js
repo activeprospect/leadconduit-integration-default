@@ -54,7 +54,10 @@ describe('Inbound Request', function () {
       assert.fail('expected an error to be thrown when form-encoded content cannot be parsed');
     } catch (e) {
       assert.equal(e.status, 400);
-      assert.equal(e.body, "Unable to parse body -- TypeError: Cannot read property 'company' of undefined.");
+      // Node ^16.19 now returns: Cannot read properties of undefined (reading 'company').
+      // Node pre-16.19 returned: Cannot read property 'company' of undefined.
+      assert.isTrue(e.body.startsWith("Unable to parse body -- TypeError: Cannot read propert"));
+      assert.isTrue(e.body.includes("'company'"));
       assert.deepEqual(e.headers, { 'Content-Type': 'text/plain' });
     }
   });
