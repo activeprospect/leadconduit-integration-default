@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.9.9] - 2023-02-07
+### Fixed
+- Fixed to better handle bad JSON on inbound ([sc-48925](https://app.shortcut.com/active-prospect/story/48925/improve-handling-of-inbound-leads-with-bad-json))
+
 ## [2.9.8] - 2022-07-06
 ### Fixed
 - Fixed SSRF bug ([sc-40370](https://app.shortcut.com/active-prospect/story/40370/h1-lc-server-side-request-forgery-ssrf-within-leadconduit-standard-functionality))

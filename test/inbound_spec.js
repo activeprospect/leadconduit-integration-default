@@ -89,6 +89,29 @@ describe('Inbound Request', function () {
     );
   });
 
+  it('should parse JSON with tab characters in values', () => {
+    const body = `{
+      "first_name": "Harold",
+      "address_1": "123\t Main St"
+    }`;
+    assertParses('application/json', body, {
+        first_name: 'Harold',
+        address_1: '123 Main St'
+    });
+  });
+
+  it('should parse JSON with newline characters in values', () => {
+    const body = `{
+      "first_name": "Harold",
+      "address_1": "123 
+      Main St"
+    }`;
+    assertParses('application/json', body, {
+      first_name: 'Harold',
+      address_1: '123       Main St'
+    });
+  });
+
   it('should parse xxTrustedFormCertUrl from request body', () => {
     const body = 'xxTrustedFormCertUrl=https://cert.trustedform.com/testtoken';
     assertParses('application/x-www-form-urlencoded', body, { trustedform_cert_url: 'https://cert.trustedform.com/testtoken' });
