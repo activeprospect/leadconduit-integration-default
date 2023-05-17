@@ -104,14 +104,13 @@ describe('Inbound Request', function () {
   });
 
   it('should parse JSON with newline characters in values', () => {
-    const body = `{
-      "first_name": "Harold",
-      "address_1": "123 
-      Main St"
-    }`;
+    // newline in address_1 value, & carriage return + newline in address_2
+    const body = '{\n    "first_name": "Harold",\n    "address_1": "123 \n      Main St",\n    "address_2": "Apt.\r\n123"\n}';
+
     assertParses('application/json', body, {
       first_name: 'Harold',
-      address_1: '123       Main St'
+      address_1: '123       Main St',
+      address_2: 'Apt.123'
     });
   });
 
