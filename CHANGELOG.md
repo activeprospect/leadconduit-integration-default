@@ -2,6 +2,10 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.9.10] - 2023-05-17
+### Fixed
+- Fixed to also handle carriage-returns in bad JSON on inbound ([sc-57317](https://app.shortcut.com/active-prospect/story/57317/fix-default-inbound-to-handle-dos-line-breaks))
+
 ## [2.9.9] - 2023-02-07
 ### Fixed
 - Fixed to better handle bad JSON on inbound ([sc-48925](https://app.shortcut.com/active-prospect/story/48925/improve-handling-of-inbound-leads-with-bad-json))
